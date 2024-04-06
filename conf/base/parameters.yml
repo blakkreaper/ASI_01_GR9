@@ -1,0 +1,50 @@
+aoi_statistics_dir: "data/01_raw/anxious_control/aoi_statistics/"
+participants_raw_dir: "data/01_raw/anxious_control/participant_raw/"
+event_statistics_dir: "data/01_raw/anxious_control/event_statistics/"
+stimulus_data_dir: "data/01_raw/anxious_control/stimulus/"
+output_parquet_dir: "data/02_intermediate/anxious_control/"
+join_key: "Participant"
+
+column_mapping_participants:
+  Index: Index Right
+  Fixation Average Pupil Diameter [mm]: Pupil Diameter Right [mm]
+  Fixation Position X [px]: Point of Regard Right X [px]
+  Fixation Position Y [px]: Point of Regard Right Y [px]
+  AOI Name: AOI Name Right
+
+columns_to_select_participants:
+  - Trial
+  - RecordingTime [ms]
+  - Time of Day [h:m:s:ms]
+  - Category Right
+  - Stimulus
+  - Participant
+  - Tracking Ratio [%]
+  - Category Group
+  - AOI Name Right
+  - Index Right
+  - Pupil Diameter Right [mm]
+  - Point of Regard Right X [px]
+  - Point of Regard Right Y [px]
+  - Gaze Vector Right X
+  - Gaze Vector Right Y
+  - Gaze Vector Right Z
+
+columns_to_drop_participants:
+  - Time of Day [h:m:s:ms]
+  - Category Group
+
+# Model setup
+columns_to_impute:
+  - AOI Name Right
+  - Category Right
+  - Index Right
+
+strategy: "most_frequent"
+
+n_splits: 5  # Number of folds for K-Fold Cross-Validation
+random_state: 42  # Seed for random number generator for reproducibility
+
+# Replace 'your_model' with the actual model class you're using, for example, sklearn.ensemble.RandomForestClassifier
+model: !!python/name:sklearn.ensemble.RandomForestClassifier
+target: predicted  # The name of the target column in your DataFrame
