@@ -1,10 +1,38 @@
-aoi_statistics_dir: "data/01_raw/anxious_control/aoi_statistics/"
-participants_raw_dir: "data/01_raw/anxious_control/participant_raw/"
-event_statistics_dir: "data/01_raw/anxious_control/event_statistics/"
-stimulus_data_dir: "data/01_raw/anxious_control/stimulus/"
-output_parquet_dir: "data/02_intermediate/anxious_control/"
+
+# Anxious
+anxious_aoi_statistics_dir: "data/01_raw/anxious_control/aoi_statistics/"
+anxious_participants_raw_dir: "data/01_raw/anxious_control/participant_raw/"
+anxious_event_statistics_dir: "data/01_raw/anxious_control/event_statistics/"
+anxious_stimulus_data_dir: "data/01_raw/anxious_control/stimulus/"
+anxious_output_parquet_dir: "data/02_intermediate/anxious_control/"
+anxious_y_value: "Anxious"
+
+# Depressive
+depressive_aoi_statistics_dir: "data/01_raw/depression/aoi_statistics/"
+depressive_participants_raw_dir: "data/01_raw/depression/participant_raw/"
+depressive_event_statistics_dir: "data/01_raw/depression/event_statistics/"
+depressive_stimulus_data_dir: "data/01_raw/depression/stimulus/"
+depressive_output_parquet_dir: "data/02_intermediate/depression/"
+depressive_y_value: "Depressive"
+
+# Control
+control_aoi_statistics_dir: "data/01_raw/control/aoi_statistics/"
+control_participants_raw_dir: "data/01_raw/control/participant_raw/"
+control_event_statistics_dir: "data/01_raw/control/event_statistics/"
+control_stimulus_data_dir: "data/01_raw/control/stimulus/"
+control_output_parquet_dir: "data/02_intermediate/control/"
+control_y_value: "Control"
+
+# Prediction
+prediction_aoi_statistics_dir: "data/01_raw/prediction/aoi_statistics/"
+prediction_participants_raw_dir: "data/01_raw/prediction/participant_raw/"
+prediction_event_statistics_dir: "data/01_raw/prediction/event_statistics/"
+prediction_stimulus_data_dir: "data/01_raw/prediction/stimulus/"
+prediction_output_parquet_dir: "data/02_intermediate/prediction/"
+
 join_key: "Participant"
 
+# Preprocessing
 column_mapping_participants:
   Index: Index Right
   Fixation Average Pupil Diameter [mm]: Pupil Diameter Right [mm]
@@ -34,6 +62,23 @@ columns_to_drop_participants:
   - Time of Day [h:m:s:ms]
   - Category Group
 
+categorical_cols:
+  - Trial
+  - Category Right
+  - Stimulus
+  - AOI Name Right
+
+numerical_cols:
+  - RecordingTime [ms]
+  - Tracking Ratio [%]
+  - Index Right
+  - Pupil Diameter Right [mm]
+  - Point of Regard Right X [px]
+  - Point of Regard Right Y [px]
+  - Gaze Vector Right X
+  - Gaze Vector Right Y
+  - Gaze Vector Right Z
+
 # Model setup
 columns_to_impute:
   - AOI Name Right
@@ -42,9 +87,6 @@ columns_to_impute:
 
 strategy: "most_frequent"
 
-n_splits: 5  # Number of folds for K-Fold Cross-Validation
+n_splits: 10  # Number of folds for K-Fold Cross-Validation
 random_state: 42  # Seed for random number generator for reproducibility
-
-# Replace 'your_model' with the actual model class you're using, for example, sklearn.ensemble.RandomForestClassifier
-model: !!python/name:sklearn.ensemble.RandomForestClassifier
-target: predicted  # The name of the target column in your DataFrame
+test_size: 0.2

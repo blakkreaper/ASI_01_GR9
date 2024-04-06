@@ -2,9 +2,10 @@ import os
 
 import dask.dataframe as dd
 import numpy as np
+import pandas as pd
+from dask_ml.preprocessing import StandardScaler, DummyEncoder
 from sklearn.impute import SimpleImputer
-
-from .data_features import DataFeatures
+from dask_ml.model_selection import train_test_split
 
 
 def extract_to_parquet(raw_data_dir: str) -> dd.DataFrame:
@@ -19,10 +20,7 @@ def extract_to_parquet(raw_data_dir: str) -> dd.DataFrame:
 
     for file_path in txt_files:
         # Read each file into a Dask DataFrame
-        df = dd.read_csv(file_path, sep='\t', assume_missing=True, dtype=dtype_dict)
-
-        # Ensure all columns are treated as strings to match dtype_dict definitions
-        df = df.astype(str)
+        df = dd.read_csv(file_path, sep='\t', assume_missing=True, dtype=dtype_dict).astype(str)
 
         dfs.append(df)
 
@@ -68,11 +66,11 @@ def impute_and_drop(data: dd.DataFrame, columns_to_impute: list, columns_to_drop
     data = data[data['Pupil Diameter Right [mm]'] != '-']
 
     # Initialize the SimpleImputer
-    imputer = SimpleImputer(missing_values='-', strategy=strategy)
+    imputer_cat = SimpleImputer(missing_values='-', strategy=strategy)
 
     # Compute the imputer statistics on the first partition (a sample)
     sample = data.get_partition(0).compute()
-    imputer.fit(sample[columns_to_impute])
+    imputer_cat.fit(sample[columns_to_impute])
 
     # Define the function to apply to each partition
     def impute_partition(partition, imputer):
@@ -83,9 +81,83 @@ def impute_and_drop(data: dd.DataFrame, columns_to_impute: list, columns_to_drop
 
     # Apply the function to each partition of the DataFrame
     meta = data._meta
-    imputed_data = data.map_partitions(impute_partition, imputer, meta=meta)
+    imputed_data = data.map_partitions(impute_partition, imputer_cat, meta=meta)
+
+    # # Add the new column with the specified string value
+    # imputed_data['Class'] = new_column_value
 
     return imputed_data
+
+
+def encode_features(x: dd.DataFrame, categorical_cols: list, numerical_cols: list) -> dd.DataFrame:
+    """
+    Encodes categorical variables and scales numerical variables.
+
+    Args:
+    - x (dd.DataFrame): The input Dask DataFrame.
+    - categorical_cols (list): List of categorical column names to encode.
+    - numerical_cols (list): List of numerical column names to scale.
+
+    Returns:
+    - dd.DataFrame: The processed Dask DataFrame with encoded and scaled features.
+    """
+    # Ensure the input DataFrame's divisions are known
+    if not x.known_divisions:
+        x = x.reset_index(drop=True)
+
+    # Encoding categorical variables
+    encoder = DummyEncoder()
+    x_cat = x[categorical_cols].categorize()
+    x_cat_encoded = encoder.fit_transform(x_cat)
+    x_cat_encoded = x_cat_encoded.reset_index(drop=True)
+
+    # Scaling numerical columns
+    x_num = x[numerical_cols].astype(float)
+    scaler = StandardScaler()
+    x_num_scaled_array = scaler.fit_transform(x_num.to_dask_array(lengths=True))
+    x_num_scaled = dd.from_dask_array(x_num_scaled_array, columns=numerical_cols)
+    x_num_scaled = x_num_scaled.reset_index(drop=True)
+
+    # Ensure same number of partitions
+    n_partitions = max(x_cat_encoded.npartitions, x_num_scaled.npartitions)
+    x_cat_encoded = x_cat_encoded.repartition(npartitions=n_partitions)
+    x_num_scaled = x_num_scaled.repartition(npartitions=n_partitions)
+
+    # Combine encoded and scaled columns
+    x_processed = dd.concat([x_cat_encoded, x_num_scaled], axis=1)
+
+    return x_processed
+
+
+def concat_dfs_and_add_class(anxious: dd.DataFrame, depressive: dd.DataFrame, control: dd.DataFrame, test_size: float, random_state: int) -> (dd.DataFrame, dd.DataFrame):
+    """
+    Concatenate three Dask DataFrames and add a 'Class' column.
+
+    Args:
+        anxious (dd.DataFrame): DataFrame containing anxious data.
+        depressive (dd.DataFrame): DataFrame containing depressive data.
+        control (dd.DataFrame): DataFrame containing control group data.
+
+    Returns:
+        X (dd.DataFrame): DataFrame containing all features.
+        Y (dd.DataFrame): DataFrame containing target variable 'Class'.
+    """
+    # Add 'Class' column to each DataFrame
+    anxious = anxious.assign(Class='Anxious')
+    depressive = depressive.assign(Class='Depressive')
+    control = control.assign(Class='Control')
+
+    # Concatenate DataFrames
+    combined_df = dd.concat([anxious, depressive, control])
+
+    # Split into features (X) and target (Y)
+    X = combined_df.drop('Class', axis=1)
+    Y = combined_df[['Class']]
+
+    # Split the data into training/validation and test sets
+    X_trainval, X_test, Y_trainval, Y_test = train_test_split(X, Y, test_size=test_size, random_state=random_state)
+
+    return X_trainval, X_test, Y_trainval, Y_test
 
 
 
