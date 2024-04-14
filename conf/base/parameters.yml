@@ -63,21 +63,55 @@ columns_to_drop_participants:
   - Category Group
 
 categorical_cols:
-  - Trial
-  - Category Right
-  - Stimulus
-  - AOI Name Right
+  - Max_Category Right
+  - Max_Stimulus
+  - Max_AOI Name Right
 
 numerical_cols:
-  - RecordingTime [ms]
-  - Tracking Ratio [%]
-  - Index Right
   - Pupil Diameter Right [mm]
   - Point of Regard Right X [px]
   - Point of Regard Right Y [px]
   - Gaze Vector Right X
   - Gaze Vector Right Y
   - Gaze Vector Right Z
+
+extra_numerical_cols:
+  - max_count_of_Stimulus
+  - max_count_of_Category Right
+  - max_count_of_AOI Name Right
+
+expected_columns:
+  - Participant
+  - Max_Category Right_Blink
+  - Max_Category Right_Fixation
+  - Max_Category Right_Saccade
+  - Max_Stimulus_11_spna_f.jpg
+  - Max_Stimulus_13_psan_f.jpg
+  - Max_Stimulus_15_pasn_f.jpg
+  - Max_Stimulus_17_psna_f.jpg
+  - Max_Stimulus_19_naps_f.jpg
+  - Max_Stimulus_1_aspn_f.jpg
+  - Max_Stimulus_21_nsap_f.jpg
+  - Max_Stimulus_23_ansp_f.jpg
+  - Max_Stimulus_3_apns_f.jpg
+  - Max_Stimulus_5_ansp_f.jpg
+  - Max_Stimulus_7_span_f.jpg
+  - Max_Stimulus_9_sapn_f.jpg
+  - Max_AOI Name Right_White Space
+  - Max_AOI Name Right_angry
+  - Max_AOI Name Right_happy
+  - Max_AOI Name Right_neutral
+  - Max_AOI Name Right_sad
+  - Pupil Diameter Right [mm]
+  - Point of Regard Right X [px]
+  - Point of Regard Right Y [px]
+  - Gaze Vector Right X
+  - Gaze Vector Right Y
+  - Gaze Vector Right Z
+  - max_count_of_Stimulus
+  - max_count_of_Category Right
+  - max_count_of_AOI Name Right
+
 
 # Model setup
 columns_to_impute:

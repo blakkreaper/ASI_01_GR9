@@ -1,6 +1,8 @@
 from kedro.pipeline import node
 
-from .nodes import extract_to_parquet, transform_parquet, impute_and_drop, concat_dfs_and_add_class, encode_features
+from .nodes import extract_to_parquet, transform_parquet, impute_and_drop, concat_dfs_and_add_class, \
+    encoders_and_features_generation, \
+    features_engineering, apply_existing_encoders_and_scale
 
 # Node def Anxious
 anxious_participants_raw_node = node(
@@ -53,7 +55,15 @@ anxious_impute_drop_node = node(
         "columns_to_drop": "params:columns_to_drop_participants",
         "strategy": "params:strategy",
     },
-    outputs="anxious_model_input_parquet"
+    outputs="anxious_imputed_parquet"
+)
+
+anxious_features_engineering = node(
+    func=features_engineering,
+    inputs={
+        "data": "anxious_imputed_parquet",
+    },
+    outputs="anxious_feature_engineering_parquet"
 )
 
 # Depressive----------------------------------------------------------------------------------------
@@ -83,7 +93,15 @@ depressive_impute_drop_node = node(
         "columns_to_drop": "params:columns_to_drop_participants",
         "strategy": "params:strategy",
     },
-    outputs="depressive_model_input_parquet"
+    outputs="depressive_imputed_parquet"
+)
+
+depressive_features_engineering = node(
+    func=features_engineering,
+    inputs={
+        "data": "depressive_imputed_parquet",
+    },
+    outputs="depressive_feature_engineering_parquet"
 )
 
 # Control----------------------------------------------------------------------------------------
@@ -113,31 +131,55 @@ control_impute_drop_node = node(
         "columns_to_drop": "params:columns_to_drop_participants",
         "strategy": "params:strategy",
     },
-    outputs="control_model_input_parquet"
+    outputs="control_imputed_parquet"
+)
+
+control_features_engineering = node(
+    func=features_engineering,
+    inputs={
+        "data": "control_imputed_parquet",
+    },
+    outputs="control_feature_engineering_parquet"
 )
 
 # Transforming for evaluation----------------------------------------------------------
 concat_parquet_node = node(
     func=concat_dfs_and_add_class,
     inputs={
-        "anxious": "anxious_model_input_parquet",
-        "depressive": "depressive_model_input_parquet",
-        "control": "control_model_input_parquet",
+        "anxious": "anxious_feature_engineering_parquet",
+        "depressive": "depressive_feature_engineering_parquet",
+        "control": "control_feature_engineering_parquet",
         "test_size": "params:test_size",
         "random_state": "params:random_state"
     },
     outputs=["x_trainval", "x_test", "y_trainval", "y_test"]
 )
 
-encode_node = node(
-    func=encode_features,
+encode_train_node = node(
+    func=encoders_and_features_generation,
     inputs={
         "x": "x_trainval",
         "categorical_cols": "params:categorical_cols",
-        "numerical_cols": "params:numerical_cols"
+        "numerical_cols": "params:numerical_cols",
+        "extra_numerical_cols": "params:extra_numerical_cols"
     },
-    outputs="x_trainval_encoded",
-    name="encode_node"
+    outputs=["x_trainval_encoded", "dummy_encoder", "scaler_encoder"],
+    name="encode_train_node"
+)
+
+encode_test_node = node(
+    func=apply_existing_encoders_and_scale,
+    inputs={
+        "x": "x_test",
+        "categorical_cols": "params:categorical_cols",
+        "numerical_cols": "params:numerical_cols",
+        "extra_numerical_cols": "params:extra_numerical_cols",
+        "expected_columns": "params:expected_columns",
+        "encoder": "dummy_encoder",
+        "scaler": "scaler_encoder"
+    },
+    outputs="x_test_encoded",
+    name="encode_test_node"
 )
 
 # Prediction----------------------------------------------------------------------------------------
@@ -167,15 +209,23 @@ prediction_impute_drop_node = node(
         "columns_to_drop": "params:columns_to_drop_participants",
         "strategy": "params:strategy",
     },
-    outputs="prediction_model_input_parquet"
+    outputs="prediction_imputed_parquet"
+)
+
+prediction_features_engineering = node(
+    func=features_engineering,
+    inputs={
+        "data": "prediction_imputed_parquet",
+    },
+    outputs="prediction_feature_engineering_parquet"
 )
 
 prediction_encoded_node = node(
-    func=encode_features,
+    func=encoders_and_features_generation,
     inputs={
-        "x": "prediction_model_input_parquet",
+        "x": "prediction_feature_engineering_parquet",
         "categorical_cols": "params:categorical_cols",
         "numerical_cols": "params:numerical_cols"
     },
-    outputs="prediction_model_input_final_parquet"
+    outputs="prediction_encoded_parquet"
 )

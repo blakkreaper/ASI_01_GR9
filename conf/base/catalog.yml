@@ -1,4 +1,4 @@
-# Anxious
+# Anxious----------------------------------------------------------------------------------
 anxious_participant_raw_parquet:
   type: dask.ParquetDataset
   filepath: data/02_intermediate/anxious_control/participant_raw.parquet
@@ -10,38 +10,38 @@ anxious_participant_raw_parquet:
     compression: 'snappy'
     row_group_size: 10000
 
-anxious_aoi_statistics_parquet:
-  type: dask.ParquetDataset
-  filepath: data/02_intermediate/anxious_control/aoi_statistics.parquet
-  load_args:
-    engine: pyarrow
-  save_args:
-    engine: pyarrow
-    write_index: False
-    compression: 'snappy'
-    row_group_size: 10000
-
-anxious_event_statistics_parquet:
-  type: dask.ParquetDataset
-  filepath: data/02_intermediate/anxious_control/event_statistics.parquet
-  load_args:
-    engine: pyarrow
-  save_args:
-    engine: pyarrow
-    write_index: False
-    compression: 'snappy'
-    row_group_size: 10000
-
-anxious_stimulus_parquet:
-  type: dask.ParquetDataset
-  filepath: data/02_intermediate/anxious_control/stimulus_raw.parquet
-  load_args:
-    engine: pyarrow
-  save_args:
-    engine: pyarrow
-    write_index: False
-    compression: 'snappy'
-    row_group_size: 10000
+#anxious_aoi_statistics_parquet:
+#  type: dask.ParquetDataset
+#  filepath: data/02_intermediate/anxious_control/aoi_statistics.parquet
+#  load_args:
+#    engine: pyarrow
+#  save_args:
+#    engine: pyarrow
+#    write_index: False
+#    compression: 'snappy'
+#    row_group_size: 10000
+#
+#anxious_event_statistics_parquet:
+#  type: dask.ParquetDataset
+#  filepath: data/02_intermediate/anxious_control/event_statistics.parquet
+#  load_args:
+#    engine: pyarrow
+#  save_args:
+#    engine: pyarrow
+#    write_index: False
+#    compression: 'snappy'
+#    row_group_size: 10000
+#
+#anxious_stimulus_parquet:
+#  type: dask.ParquetDataset
+#  filepath: data/02_intermediate/anxious_control/stimulus_raw.parquet
+#  load_args:
+#    engine: pyarrow
+#  save_args:
+#    engine: pyarrow
+#    write_index: False
+#    compression: 'snappy'
+#    row_group_size: 10000
 
 anxious_trans_participants_parquet:
   type: dask.ParquetDataset
@@ -54,7 +54,7 @@ anxious_trans_participants_parquet:
     compression: 'snappy'
     row_group_size: 10000
 
-anxious_model_input_parquet:
+anxious_imputed_parquet:
   type: dask.ParquetDataset
   filepath: data/04_feature/anxious_control/impute_drop.parquet
   save_args:
@@ -63,8 +63,17 @@ anxious_model_input_parquet:
     compression: 'snappy'
     row_group_size: 10000
 
+anxious_feature_engineering_parquet:
+  type: dask.ParquetDataset
+  filepath: data/04_feature/anxious_control/feature_engineering.parquet
+  save_args:
+    engine: pyarrow
+    write_index: False
+    compression: 'snappy'
+    row_group_size: 10000
 
-# Depressive
+
+# Depressive----------------------------------------------------------------------------------
 depressive_participant_raw_parquet:
   type: dask.ParquetDataset
   filepath: data/02_intermediate/depression/participant_raw.parquet
@@ -87,7 +96,7 @@ depressive_trans_participants_parquet:
     compression: 'snappy'
     row_group_size: 10000
 
-depressive_model_input_parquet:
+depressive_imputed_parquet:
   type: dask.ParquetDataset
   filepath: data/04_feature/depression/impute_drop.parquet
   save_args:
@@ -96,7 +105,16 @@ depressive_model_input_parquet:
     compression: 'snappy'
     row_group_size: 10000
 
-# Control
+depressive_feature_engineering_parquet:
+  type: dask.ParquetDataset
+  filepath: data/04_feature/depression/feature_engineering.parquet
+  save_args:
+    engine: pyarrow
+    write_index: False
+    compression: 'snappy'
+    row_group_size: 10000
+
+# Control----------------------------------------------------------------------------------
 control_participant_raw_parquet:
   type: dask.ParquetDataset
   filepath: data/02_intermediate/control/participant_raw.parquet
@@ -119,7 +137,7 @@ control_trans_participants_parquet:
     compression: 'snappy'
     row_group_size: 10000
 
-control_model_input_parquet:
+control_imputed_parquet:
   type: dask.ParquetDataset
   filepath: data/04_feature/control/impute_drop.parquet
   save_args:
@@ -128,43 +146,9 @@ control_model_input_parquet:
     compression: 'snappy'
     row_group_size: 10000
 
-# Prediction
-prediction_participant_raw_parquet:
+control_feature_engineering_parquet:
   type: dask.ParquetDataset
-  filepath: data/02_intermediate/prediction/participant_raw.parquet
-  load_args:
-    engine: pyarrow
-  save_args:
-    engine: pyarrow
-    write_index: False
-    compression: 'snappy'
-    row_group_size: 10000
-
-prediction_trans_participants_parquet:
-  type: dask.ParquetDataset
-  filepath: data/03_primary/prediction/trans_participants.parquet
-  load_args:
-    engine: pyarrow
-  save_args:
-    engine: pyarrow
-    write_index: False
-    compression: 'snappy'
-    row_group_size: 10000
-
-prediction_model_input_parquet:
-  type: dask.ParquetDataset
-  filepath: data/04_feature/prediction/impute_drop.parquet
-  save_args:
-    engine: pyarrow
-    write_index: False
-    compression: 'snappy'
-    row_group_size: 10000
-
-prediction_parquet:
-  type: dask.ParquetDataset
-  filepath: data/07_model_output/output_parquet.parquet
-  load_args:
-    engine: pyarrow
+  filepath: data/04_feature/control/feature_engineering.parquet
   save_args:
     engine: pyarrow
     write_index: False
@@ -227,10 +211,75 @@ x_trainval_encoded:
     compression: 'snappy'
     row_group_size: 10000
 
+x_test_encoded:
+  type: dask.ParquetDataset
+  filepath: data/05_model_input/x_test_encoded_parquet.parquet
+  load_args:
+    engine: pyarrow
+  save_args:
+    engine: pyarrow
+    write_index: False
+    compression: 'snappy'
+    row_group_size: 10000
+
 best_model:
   type: pickle.PickleDataset
   filepath: data/06_models/best_model.pkl
 
-best_score:
-  type: text.TextDataset
-  filepath: data/07_model_output/best_cm.txt
+scaler_encoder:
+  type: pickle.PickleDataset
+  filepath: data/06_models/encoders/scaler_encoder.pkl
+
+dummy_encoder:
+  type: pickle.PickleDataset
+  filepath: data/06_models/encoders/dummy_encoder.pkl
+
+# Prediction----------------------------------------------------------------------------------
+prediction_participant_raw_parquet:
+  type: dask.ParquetDataset
+  filepath: data/02_intermediate/prediction/participant_raw.parquet
+  load_args:
+    engine: pyarrow
+  save_args:
+    engine: pyarrow
+    write_index: False
+    compression: 'snappy'
+    row_group_size: 10000
+
+prediction_trans_participants_parquet:
+  type: dask.ParquetDataset
+  filepath: data/03_primary/prediction/trans_participants.parquet
+  load_args:
+    engine: pyarrow
+  save_args:
+    engine: pyarrow
+    write_index: False
+    compression: 'snappy'
+    row_group_size: 10000
+
+prediction_imputed_parquet:
+  type: dask.ParquetDataset
+  filepath: data/04_feature/prediction/impute_drop.parquet
+  save_args:
+    engine: pyarrow
+    write_index: False
+    compression: 'snappy'
+    row_group_size: 10000
+
+prediction_feature_engineering_parquet:
+  type: dask.ParquetDataset
+  filepath: data/04_feature/prediction/feature_engineering.parquet
+  save_args:
+    engine: pyarrow
+    write_index: False
+    compression: 'snappy'
+    row_group_size: 10000
+
+prediction_encoded_parquet:
+  type: dask.ParquetDataset
+  filepath: data/05_model_input/prediction/prediction_encoded_parquet.parquet
+  save_args:
+    engine: pyarrow
+    write_index: False
+    compression: 'snappy'
+    row_group_size: 10000
