@@ -1,12 +1,9 @@
 import os
 
 import dask.dataframe as dd
-import pandas as pd
 
 from .tran_dataframe import DataTransformation
-from dask_ml.preprocessing import StandardScaler, DummyEncoder
 from sklearn.impute import SimpleImputer
-import joblib
 from dask_ml.model_selection import train_test_split
 
 
@@ -167,114 +164,9 @@ def concat_dfs_and_add_class(anxious: dd.DataFrame, depressive: dd.DataFrame, co
     combined_df = dd.concat([anxious, depressive, control])
 
     # Globally shuffle the combined DataFrame to mix classes across all partitions
-    combined_df = combined_df.shuffle(on='Participant')
-
-    # combined_df = combined_df.repartition(npartitions='auto')
-
-    # Reset index post-shuffling to maintain a proper sequence
-    combined_df = combined_df.reset_index(drop=True)
-
-    # Split into features (X) and target (Y)
-    Y = combined_df[['Class']]
-    X = combined_df.drop('Class', axis=1)
+    combined_df = combined_df.sample(frac=1).reset_index(drop=True)
 
     # Split the data into training/validation and test sets
-    X_trainval, X_test, Y_trainval, Y_test = train_test_split(X, Y, test_size=test_size, random_state=random_state)
+    train_data, test_data = train_test_split(combined_df, test_size=test_size, random_state=random_state, shuffle='True')
 
-    return X_trainval, X_test, Y_trainval, Y_test
-
-
-def encoders_and_features_generation(x: dd.DataFrame, categorical_cols: list, numerical_cols: list,
-                                     extra_numerical_cols: list = None) -> tuple[dd.DataFrame, DummyEncoder, StandardScaler]:
-    """
-    Encodes categorical variables and scales numerical variables in a Dask DataFrame while preserving identifiers.
-    Returns the processed DataFrame along with the encoder and scaler for later use.
-
-    Returns:
-        - Tuple: (Processed DataFrame, encoder, scaler)
-    """
-    # Separate identifiers to keep them unchanged
-    identifiers = x[['Participant']]  # Ensure it's a DataFrame
-
-    # Encoding categorical variables
-    encoder = None
-    if categorical_cols:
-        encoder = DummyEncoder()
-        features_cat = x[categorical_cols].categorize()
-        features_encoded = encoder.fit_transform(features_cat)
-    else:
-        features_encoded = dd.from_pandas(pd.DataFrame(index=x.index), npartitions=x.npartitions)
-
-    # Scaling primary numerical columns
-    scaler = None
-    if numerical_cols:
-        scaler = StandardScaler()
-        features_num = x[numerical_cols].astype(float)
-        features_scaled = scaler.fit_transform(features_num)
-    else:
-        features_scaled = dd.from_pandas(pd.DataFrame(index=x.index), npartitions=x.npartitions)
-
-    # Convert extra numerical columns to integers, if present
-    if extra_numerical_cols:
-        integer_features = x[extra_numerical_cols].astype(int)
-        processed_features = dd.concat([features_encoded, features_scaled, integer_features], axis=1)
-    else:
-        processed_features = dd.concat([features_encoded, features_scaled], axis=1)
-
-    # Reattach identifiers
-    x_processed = dd.concat([identifiers, processed_features], axis=1).reset_index(drop=True)
-
-    return x_processed, encoder, scaler
-
-
-def apply_existing_encoders_and_scale(x: dd.DataFrame, categorical_cols: list, numerical_cols: list,
-                                      extra_numerical_cols: list = None, encoder: DummyEncoder = None, scaler: StandardScaler = None,
-                                      expected_columns=None) -> dd.DataFrame:
-    """
-    Applies existing encoders and scalers to categorical and numerical variables in a Dask DataFrame
-    while ensuring that all expected columns are present and correctly initialized if missing.
-
-    Args:
-        x (dd.DataFrame): The input Dask DataFrame.
-        categorical_cols (list of str): List of categorical column names to encode.
-        numerical_cols (list of str): List of primary numerical column names to scale.
-        extra_numerical_cols (list of str, optional): Additional numerical column names to keep as integers.
-        encoder (DummyEncoder): Preloaded encoder.
-        scaler (StandardScaler): Preloaded scaler.
-        expected_columns (list of str, optional): List of all expected column names to ensure are present in the output.
-
-    Returns:
-        dd.DataFrame: The processed Dask DataFrame with encoded and scaled features, including identifiers.
-    """
-    # Separate identifiers to keep them unchanged
-    identifiers = x[['Participant']]  # Assuming 'Participant' is the identifier column
-
-    # Apply encoding to categorical variables
-    features_cat = x[categorical_cols].categorize()
-    features_encoded = encoder.transform(features_cat)
-
-    # Apply scaling to numerical columns
-    features_num = x[numerical_cols].astype(float)
-    features_scaled = scaler.transform(features_num)
-
-    # Handle extra numerical columns, if present
-    if extra_numerical_cols:
-        integer_features = x[extra_numerical_cols].astype(int)
-        processed_features = dd.concat([features_encoded, features_scaled, integer_features], axis=1)
-    else:
-        processed_features = dd.concat([features_encoded, features_scaled], axis=1)
-
-    # Reattach identifiers
-    x_processed = dd.concat([identifiers, processed_features], axis=1).reset_index(drop=True)
-
-    # Ensure all expected columns are present, initializing missing ones as required
-    if expected_columns:
-        for column in expected_columns:
-            if column not in x_processed.columns:
-                # Initialize 'Max_' columns with False or others with a suitable default value
-                if column.startswith('Max_'):
-                    x_processed[column] = False
-                else:
-                    x_processed[column] = None  # Adjust according to your needs
-
-    return x_processed
+    return train_data, test_data

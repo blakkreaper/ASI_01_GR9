@@ -1,8 +1,7 @@
 from kedro.pipeline import node
 
-from .nodes import extract_to_parquet, transform_parquet, impute_and_drop, concat_dfs_and_add_class, \
-    encoders_and_features_generation, \
-    features_engineering, apply_existing_encoders_and_scale
+from .nodes import (extract_to_parquet, transform_parquet, impute_and_drop,
+                    concat_dfs_and_add_class, features_engineering)
 
 # Node def Anxious
 anxious_participants_raw_node = node(
@@ -12,30 +11,6 @@ anxious_participants_raw_node = node(
     },
     outputs="anxious_participant_raw_parquet"
 )
-#
-# aoi_statistics_node = node(
-#     func=extract_to_parquet,
-#     inputs={
-#         "raw_data_dir": "params:anxious_aoi_statistics_dir",
-#     },
-#     outputs="aoi_statistics_parquet"
-# )
-#
-# event_statistics_node = node(
-#     func=extract_to_parquet,
-#     inputs={
-#         "raw_data_dir": "params:anxious_event_statistics_dir"
-#     },
-#     outputs="event_statistics_parquet"
-# )
-#
-# stimulus_anxious_node = node(
-#     func=extract_to_parquet,
-#     inputs={
-#         "raw_data_dir": "params:anxious_stimulus_data_dir",
-#     },
-#     outputs="stimulus_parquet"
-# )
 
 anxious_joined_anxious_node = node(
     func=transform_parquet,
@@ -152,80 +127,5 @@ concat_parquet_node = node(
         "test_size": "params:test_size",
         "random_state": "params:random_state"
     },
-    outputs=["x_trainval", "x_test", "y_trainval", "y_test"]
-)
-
-encode_train_node = node(
-    func=encoders_and_features_generation,
-    inputs={
-        "x": "x_trainval",
-        "categorical_cols": "params:categorical_cols",
-        "numerical_cols": "params:numerical_cols",
-        "extra_numerical_cols": "params:extra_numerical_cols"
-    },
-    outputs=["x_trainval_encoded", "dummy_encoder", "scaler_encoder"],
-    name="encode_train_node"
-)
-
-encode_test_node = node(
-    func=apply_existing_encoders_and_scale,
-    inputs={
-        "x": "x_test",
-        "categorical_cols": "params:categorical_cols",
-        "numerical_cols": "params:numerical_cols",
-        "extra_numerical_cols": "params:extra_numerical_cols",
-        "expected_columns": "params:expected_columns",
-        "encoder": "dummy_encoder",
-        "scaler": "scaler_encoder"
-    },
-    outputs="x_test_encoded",
-    name="encode_test_node"
-)
-
-# Prediction----------------------------------------------------------------------------------------
-prediction_participants_raw_node = node(
-    func=extract_to_parquet,
-    inputs={
-        "raw_data_dir": "params:prediction_participants_raw_dir",
-    },
-    outputs="prediction_participant_raw_parquet"
-)
-
-prediction_joined_anxious_node = node(
-    func=transform_parquet,
-    inputs={
-        "parquet_file": "prediction_participant_raw_parquet",
-        "column_mapping": "params:column_mapping_participants",
-        "columns_to_select": "params:columns_to_select_participants"
-    },
-    outputs="prediction_trans_participants_parquet"
-)
-
-prediction_impute_drop_node = node(
-    func=impute_and_drop,
-    inputs={
-        "data": "prediction_trans_participants_parquet",
-        "columns_to_impute": "params:columns_to_impute",
-        "columns_to_drop": "params:columns_to_drop_participants",
-        "strategy": "params:strategy",
-    },
-    outputs="prediction_imputed_parquet"
-)
-
-prediction_features_engineering = node(
-    func=features_engineering,
-    inputs={
-        "data": "prediction_imputed_parquet",
-    },
-    outputs="prediction_feature_engineering_parquet"
-)
-
-prediction_encoded_node = node(
-    func=encoders_and_features_generation,
-    inputs={
-        "x": "prediction_feature_engineering_parquet",
-        "categorical_cols": "params:categorical_cols",
-        "numerical_cols": "params:numerical_cols"
-    },
-    outputs="prediction_encoded_parquet"
+    outputs=["train_data", "test_data"]
 )
