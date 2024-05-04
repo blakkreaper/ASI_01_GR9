@@ -21,15 +21,15 @@ def train_model(train_data: dd.DataFrame, test_data: dd.DataFrame) -> ParallelPo
 
     # Inicjalizacja sesji WANDB
     wandb.init(project="depression_prediction", entity="mlody1230")
-    label = 'Class'
+    label: str = 'Class'
 
     # Trenowanie modelu z AutoGluon
-    predictor = TabularPredictor(label=label, eval_metric='accuracy').fit(train_data, hyperparameters=hyperparameters,
+    predictor: TabularPredictor = TabularPredictor(label=label, eval_metric='accuracy').fit(train_data, hyperparameters=hyperparameters,
                                                                           presets='best_quality', time_limit=3600)
 
     # Ewaluacja modelu
-    performance = predictor.evaluate(test_data)
-    y_score = predictor.predict_proba(test_data)
+    performance:dict = predictor.evaluate(test_data)
+    y_score: np.ndarray = predictor.predict_proba(test_data)
 
     # Przygotowanie danych do wizualizacji w WANDB
     data_for_plot = [[metric, value] for metric, value in performance.items()]
