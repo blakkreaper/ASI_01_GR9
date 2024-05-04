@@ -1,8 +1,10 @@
+import numpy as np
 import pandas as pd
 from autogluon.tabular import TabularPredictor
 import wandb
 from dask_ml.wrappers import ParallelPostFit
 import dask.dataframe as dd
+from sklearn.metrics import roc_curve
 
 
 def train_model(train_data: dd.DataFrame, test_data: dd.DataFrame) -> ParallelPostFit:
@@ -10,11 +12,9 @@ def train_model(train_data: dd.DataFrame, test_data: dd.DataFrame) -> ParallelPo
     test_data: pd.DataFrame = test_data.compute()
 
     hyperparameters = {
-        'GBM': [
-            {'extra_trees': True, 'ag_args': {'name_suffix': 'XT'}},
-            {},
-            {'extra_trees': True, 'ag_args': {'name_suffix': '1m', 'max_memory_usage_ratio': 1.0}}
-        ],
+        'GBM': {'extra_trees': True},
+        'RF': {'n_estimators': 100, 'max_depth': 10},
+        'KNN': {'weights': 'uniform', 'n_neighbors': 5},
         'CAT': {'iterations': 10000, 'learning_rate': 0.01},
         'XGB': {'booster': 'gbtree', 'verbosity': 1},
     }
@@ -30,6 +30,13 @@ def train_model(train_data: dd.DataFrame, test_data: dd.DataFrame) -> ParallelPo
     # Ewaluacja modelu
     performance = predictor.evaluate(test_data)
 
+    y_score = predictor.predict_proba(test_data)
+
+    print(test_data)
+
+    # # Krzywa ROC
+    # roc_auc = roc_curve(y_true=test_data[label], y_score=y_score, average='weighted', multi_class='ovo')
+
     # Przygotowanie danych do wizualizacji w WANDB
     data_for_plot = [[metric, value] for metric, value in performance.items()]
     table = wandb.Table(data=data_for_plot, columns=["Metric", "Value"])
@@ -40,7 +47,12 @@ def train_model(train_data: dd.DataFrame, test_data: dd.DataFrame) -> ParallelPo
     # Logowanie wykresu przy użyciu wandb.plot.bar
     wandb.log({"Metrics Bar Chart": wandb.plot.bar(table, "Metric", "Value", title="Performance Metrics")})
 
+    # Logowanie krzywej ROC
+    wandb.log({"ROC Curve": wandb.plot.roc_curve(y_true=test_data[label], y_probas=y_score)})
+
     # Zakończenie sesji WANDB
     wandb.finish()
+
+    print(predictor.leaderboard())
 
     return predictor
