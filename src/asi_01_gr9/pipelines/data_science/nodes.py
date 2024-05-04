@@ -29,13 +29,7 @@ def train_model(train_data: dd.DataFrame, test_data: dd.DataFrame) -> ParallelPo
 
     # Ewaluacja modelu
     performance = predictor.evaluate(test_data)
-
     y_score = predictor.predict_proba(test_data)
-
-    print(test_data)
-
-    # # Krzywa ROC
-    # roc_auc = roc_curve(y_true=test_data[label], y_score=y_score, average='weighted', multi_class='ovo')
 
     # Przygotowanie danych do wizualizacji w WANDB
     data_for_plot = [[metric, value] for metric, value in performance.items()]
@@ -53,6 +47,7 @@ def train_model(train_data: dd.DataFrame, test_data: dd.DataFrame) -> ParallelPo
     # Zakończenie sesji WANDB
     wandb.finish()
 
+    # Tabela ze statystykami algorytmow
     print(predictor.leaderboard())
 
     return predictor
