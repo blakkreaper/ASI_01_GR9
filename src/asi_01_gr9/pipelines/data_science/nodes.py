@@ -24,11 +24,13 @@ def train_model(train_data: dd.DataFrame, test_data: dd.DataFrame) -> ParallelPo
     label: str = 'Class'
 
     # Trenowanie modelu z AutoGluon
-    predictor: TabularPredictor = TabularPredictor(label=label, eval_metric='accuracy').fit(train_data, hyperparameters=hyperparameters,
-                                                                          presets='best_quality', time_limit=3600)
+    predictor: TabularPredictor = TabularPredictor(label=label, eval_metric='accuracy').fit(train_data,
+                                                                                            hyperparameters=hyperparameters,
+                                                                                            presets='best_quality',
+                                                                                            time_limit=3600)
 
     # Ewaluacja modelu
-    performance:dict = predictor.evaluate(test_data)
+    performance: dict = predictor.evaluate(test_data)
     y_score: np.ndarray = predictor.predict_proba(test_data)
 
     # Przygotowanie danych do wizualizacji w WANDB

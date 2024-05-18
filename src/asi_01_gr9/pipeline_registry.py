@@ -2,6 +2,7 @@
 
 from kedro.pipeline import Pipeline
 
+from .pipelines.api_pipeline.pipeline import create_api_train_pipeline
 from .pipelines.data_processing import anxious_participants_raw_node, anxious_joined_anxious_node, \
     anxious_impute_drop_node, depressive_participants_raw_node, depressive_joined_anxious_node, \
     depressive_impute_drop_node, control_joined_anxious_node, control_participants_raw_node, control_impute_drop_node, \
@@ -37,6 +38,7 @@ def create_train_pipeline(**kwargs) -> Pipeline:
 def register_pipelines():
     return {
         "training_data_preprocessing": create_preprocess_pipeline(),
-        "training_train_model": create_train_pipeline()
+        "training_train_model": create_train_pipeline(),
+        "api_train_model": create_api_train_pipeline()
         # Add any additional pipelines here
     }
