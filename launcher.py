@@ -3,7 +3,7 @@ import requests
 import time
 
 # Uruchom api
-subprocess.Popen(["python", "api.py"])
+subprocess.Popen(["python", "app.py"])
 
 # Uruchom streamlit
 while True:

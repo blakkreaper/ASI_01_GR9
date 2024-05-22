@@ -4,6 +4,8 @@ from kedro.framework.session import KedroSession
 from kedro.framework.startup import bootstrap_project
 import wandb
 from pathlib import Path
+import uvicorn
+
 
 app = FastAPI()
 
@@ -48,3 +50,6 @@ async def train_model():
 
         # Get the wandb run URL
         wandb_url = wandb_run.url
+
+if __name__ == '__main__':
+    uvicorn.run(app, host="0.0.0.0", port=8001)
