@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from kedro.framework.session import KedroSession
 from kedro.framework.startup import bootstrap_project
 import wandb
+from pathlib import Path
 
 app = FastAPI()
 
@@ -10,28 +11,40 @@ app = FastAPI()
 class PipelineRequest(BaseModel):
     pipeline_name: str
 
+@app.get("/")
+def get_root():
+    return "string"#RedirectResponse()
 
-project_path = "D:/PROJEKTY/Python/ASI/ASI_01/asi-01-gr9"
-bootstrap_project(project_path)
+@app.get("/process_data")
+async def process_data():
+    project = Path.cwd()
+    bootstrap_project(project)
+    with KedroSession.create(project) as session:
+        # Start a new wandb run
+        wandb_run = wandb.init(project="depression_prediction", reinit=True)
 
+        # Run the Kedro pipeline
+        result = session.run(pipeline_name='training_data_preprocessing')
 
-@app.post("/run_pipeline")
-async def run_pipeline(request: PipelineRequest):
-    pipeline_name = request.pipeline_name
-    try:
-        with KedroSession.create(project_path=project_path) as session:
-            # Start a new wandb run
-            wandb_run = wandb.init(project="depression_prediction", reinit=True)
+        # Finish the wandb run
+        wandb.finish()
 
-            # Run the Kedro pipeline
-            result = session.run(pipeline_name=pipeline_name)
+        # Get the wandb run URL
+        wandb_url = wandb_run.url
 
-            # Finish the wandb run
-            wandb.finish()
+@app.get("/train_model")
+async def train_model():
+    project = Path.cwd()
+    bootstrap_project(project)
+    with KedroSession.create(project) as session:
+        # Start a new wandb run
+        wandb_run = wandb.init(project="depression_prediction", reinit=True)
 
-            # Get the wandb run URL
-            wandb_url = wandb_run.url
+        # Run the Kedro pipeline
+        result = session.run(pipeline_name='training_train_model')
 
-            return {"status": "Pipeline executed", "result": result, "wandb_url": wandb_url}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        # Finish the wandb run
+        wandb.finish()
+
+        # Get the wandb run URL
+        wandb_url = wandb_run.url
