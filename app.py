@@ -17,6 +17,19 @@ class PipelineRequest(BaseModel):
 def get_root():
     return "string"#RedirectResponse()
 
+
+# @app.get("/upload_data")
+# async def upload_data():
+#     process_data()
+    
+# @app.get("/config/set")
+# async def set_config():
+    
+# @app.get("/config/get")
+# async def get_config():
+    
+
+
 @app.get("/process_data")
 async def process_data():
     project = Path.cwd()
@@ -50,6 +63,27 @@ async def train_model():
 
         # Get the wandb run URL
         wandb_url = wandb_run.url
+
+
+@app.get("/predict")
+async def predict(plikcsv):
+    project = Path.cwd()
+    bootstrap_project(project)
+    with KedroSession.create(project) as session:
+        # Start a new wandb run
+        wandb_run = wandb.init(project="depression_prediction", reinit=True)
+
+        # Run the Kedro pipeline
+        result = session.run(pipeline_name='predict_model')
+
+        # Finish the wandb run
+        wandb.finish()
+
+        # Get the wandb run URL
+        wandb_url = wandb_run.url
+        
+        return h_params_csv
+
 
 if __name__ == '__main__':
     uvicorn.run(app, host="0.0.0.0", port=8001)
