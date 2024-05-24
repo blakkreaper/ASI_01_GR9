@@ -1,0 +1,126 @@
+
+# Anxious
+anxious_aoi_statistics_dir: "data/01_raw/anxious_control/aoi_statistics/"
+anxious_participants_raw_dir: "data/01_raw/anxious_control/participant_raw/"
+anxious_event_statistics_dir: "data/01_raw/anxious_control/event_statistics/"
+anxious_stimulus_data_dir: "data/01_raw/anxious_control/stimulus/"
+anxious_output_parquet_dir: "data/02_intermediate/anxious_control/"
+anxious_y_value: "Anxious"
+
+# Depressive
+depressive_aoi_statistics_dir: "data/01_raw/depression/aoi_statistics/"
+depressive_participants_raw_dir: "data/01_raw/depression/participant_raw/"
+depressive_event_statistics_dir: "data/01_raw/depression/event_statistics/"
+depressive_stimulus_data_dir: "data/01_raw/depression/stimulus/"
+depressive_output_parquet_dir: "data/02_intermediate/depression/"
+depressive_y_value: "Depressive"
+
+# Control
+control_aoi_statistics_dir: "data/01_raw/control/aoi_statistics/"
+control_participants_raw_dir: "data/01_raw/control/participant_raw/"
+control_event_statistics_dir: "data/01_raw/control/event_statistics/"
+control_stimulus_data_dir: "data/01_raw/control/stimulus/"
+control_output_parquet_dir: "data/02_intermediate/control/"
+control_y_value: "Control"
+
+# Prediction
+prediction_aoi_statistics_dir: "data/01_raw/prediction/aoi_statistics/"
+prediction_participants_raw_dir: "data/01_raw/prediction/participant_raw/"
+prediction_event_statistics_dir: "data/01_raw/prediction/event_statistics/"
+prediction_stimulus_data_dir: "data/01_raw/prediction/stimulus/"
+prediction_output_parquet_dir: "data/02_intermediate/prediction/"
+
+join_key: "Participant"
+
+# Preprocessing
+column_mapping_participants:
+  Index: Index Right
+  Fixation Average Pupil Diameter [mm]: Pupil Diameter Right [mm]
+  Fixation Position X [px]: Point of Regard Right X [px]
+  Fixation Position Y [px]: Point of Regard Right Y [px]
+  AOI Name: AOI Name Right
+
+columns_to_select_participants:
+  - Trial
+  - RecordingTime [ms]
+  - Time of Day [h:m:s:ms]
+  - Category Right
+  - Stimulus
+  - Participant
+  - Tracking Ratio [%]
+  - Category Group
+  - AOI Name Right
+  - Index Right
+  - Pupil Diameter Right [mm]
+  - Point of Regard Right X [px]
+  - Point of Regard Right Y [px]
+  - Gaze Vector Right X
+  - Gaze Vector Right Y
+  - Gaze Vector Right Z
+
+columns_to_drop_participants:
+  - Time of Day [h:m:s:ms]
+  - Category Group
+
+categorical_cols:
+  - Max_Category Right
+  - Max_Stimulus
+  - Max_AOI Name Right
+
+numerical_cols:
+  - Pupil Diameter Right [mm]
+  - Point of Regard Right X [px]
+  - Point of Regard Right Y [px]
+  - Gaze Vector Right X
+  - Gaze Vector Right Y
+  - Gaze Vector Right Z
+
+extra_numerical_cols:
+  - max_count_of_Stimulus
+  - max_count_of_Category Right
+  - max_count_of_AOI Name Right
+
+expected_columns:
+  - Participant
+  - Max_Category Right_Blink
+  - Max_Category Right_Fixation
+  - Max_Category Right_Saccade
+  - Max_Stimulus_11_spna_f.jpg
+  - Max_Stimulus_13_psan_f.jpg
+  - Max_Stimulus_15_pasn_f.jpg
+  - Max_Stimulus_17_psna_f.jpg
+  - Max_Stimulus_19_naps_f.jpg
+  - Max_Stimulus_1_aspn_f.jpg
+  - Max_Stimulus_21_nsap_f.jpg
+  - Max_Stimulus_23_ansp_f.jpg
+  - Max_Stimulus_3_apns_f.jpg
+  - Max_Stimulus_5_ansp_f.jpg
+  - Max_Stimulus_7_span_f.jpg
+  - Max_Stimulus_9_sapn_f.jpg
+  - Max_AOI Name Right_White Space
+  - Max_AOI Name Right_angry
+  - Max_AOI Name Right_happy
+  - Max_AOI Name Right_neutral
+  - Max_AOI Name Right_sad
+  - Pupil Diameter Right [mm]
+  - Point of Regard Right X [px]
+  - Point of Regard Right Y [px]
+  - Gaze Vector Right X
+  - Gaze Vector Right Y
+  - Gaze Vector Right Z
+  - max_count_of_Stimulus
+  - max_count_of_Category Right
+  - max_count_of_AOI Name Right
+
+
+# Model setup
+columns_to_impute:
+  - AOI Name Right
+  - Category Right
+  - Index Right
+
+strategy: "most_frequent"
+
+n_splits: 10  # Number of folds for K-Fold Cross-Validation
+random_state: 42  # Seed for random number generator for reproducibility
+test_size: 0.2

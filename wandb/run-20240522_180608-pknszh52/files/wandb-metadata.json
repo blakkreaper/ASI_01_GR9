@@ -1,0 +1,53 @@
+{
+    "os": "Windows-10-10.0.22000-SP0",
+    "python": "3.10.14",
+    "heartbeatAt": "2024-05-22T16:06:09.878399",
+    "startedAt": "2024-05-22T16:06:08.740543",
+    "docker": null,
+    "cuda": null,
+    "args": [],
+    "state": "running",
+    "program": "H:\\ASI\\ASI_01_GR9\\app.py",
+    "codePathLocal": "app.py",
+    "codePath": "app.py",
+    "git": {
+        "remote": "https://github.com/blakkreaper/ASI_01_GR9.git",
+        "commit": "19ff22cc543865ae633d53afffd75bd5cee6ab2c"
+    },
+    "email": "s22807@pjwstk.edu.pl",
+    "root": "H:/ASI/ASI_01_GR9",
+    "host": "DESKTOP-7BGVO9C",
+    "username": "SzymonGajda",
+    "executable": "C:\\ProgramData\\Anaconda3\\envs\\ASI2\\python.exe",
+    "cpu_count": 12,
+    "cpu_count_logical": 24,
+    "cpu_freq": {
+        "current": 3701.0,
+        "min": 0.0,
+        "max": 3701.0
+    },
+    "cpu_freq_per_core": [
+        {
+            "current": 3701.0,
+            "min": 0.0,
+            "max": 3701.0
+        }
+    ],
+    "disk": {
+        "/": {
+            "total": 631.5107383728027,
+            "used": 497.3749122619629
+        }
+    },
+    "gpu": "NVIDIA GeForce RTX 3080",
+    "gpu_count": 1,
+    "gpu_devices": [
+        {
+            "name": "NVIDIA GeForce RTX 3080",
+            "memory_total": 10737418240
+        }
+    ],
+    "memory": {
+        "total": 31.905628204345703
+    }
+}

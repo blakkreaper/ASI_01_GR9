@@ -1,0 +1,15 @@
+# API information
+title: 'FastAPI'
+version: '0.1.0'
+
+# Declare all tags
+tags:
+  users:
+    description: "Operations with users. The **login** logic is also here."
+  items:
+    description: "Manage items. So _fancy_ they have their own docs."
+
+routes:
+  run_pipeline:
+    predictor: api_train_model
+    parameters: {}
