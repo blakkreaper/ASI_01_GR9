@@ -2,6 +2,7 @@ import subprocess
 import requests
 import time
 import logging
+import threading
 import sys
 
 # Konfiguracja logowania
@@ -15,11 +16,8 @@ API_URL = f"http://localhost:{API_PORT}/"
 
 def start_fastapi():
     logger.info("Starting FastAPI server...")
-    api_process = subprocess.Popen(["python", "app.py"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    for line in api_process.stdout:
-        logger.info(line.decode().strip())
-    for line in api_process.stderr:
-        logger.error(line.decode().strip())
+    api_process = subprocess.Popen(["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8001"],
+                                   stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     return api_process
 
 
@@ -27,11 +25,14 @@ def start_streamlit():
     logger.info("Starting Streamlit application...")
     streamlit_process = subprocess.Popen(["streamlit", "run", "streamlit.py"], stdout=subprocess.PIPE,
                                          stderr=subprocess.PIPE)
-    for line in streamlit_process.stdout:
-        logger.info(line.decode().strip())
-    for line in streamlit_process.stderr:
-        logger.error(line.decode().strip())
     return streamlit_process
+
+
+def log_process_output(process, name):
+    for line in process.stdout:
+        logger.info(f"{name}: {line.decode().strip()}")
+    for line in process.stderr:
+        logger.error(f"{name}: {line.decode().strip()}")
 
 
 def wait_for_api():
@@ -60,14 +61,20 @@ def main():
     streamlit_process = None
 
     try:
-        # Uruchom FastAPI w osobnym wątku
+        # Uruchom FastAPI
         api_process = start_fastapi()
+
+        # Uruchom wątek do logowania wyjścia FastAPI
+        threading.Thread(target=log_process_output, args=(api_process, "FastAPI")).start()
 
         # Czekaj na dostępność API
         wait_for_api()
 
         # Uruchom Streamlit
         streamlit_process = start_streamlit()
+
+        # Uruchom wątek do logowania wyjścia Streamlit
+        threading.Thread(target=log_process_output, args=(streamlit_process, "Streamlit")).start()
 
         # Poczekaj na zakończenie Streamlit
         streamlit_process.wait()
