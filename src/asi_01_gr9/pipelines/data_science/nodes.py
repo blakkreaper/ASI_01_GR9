@@ -1,13 +1,13 @@
-import numpy as np
-import pandas as pd
-from autogluon.tabular import TabularPredictor
-import wandb
-from dask_ml.wrappers import ParallelPostFit
 import dask.dataframe as dd
-from sklearn.metrics import roc_curve
+import pandas as pd
+import numpy as np
+import wandb
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
+import matplotlib.pyplot as plt
+from autogluon.tabular import TabularPredictor
 
 
-def train_model(train_data: dd.DataFrame, test_data: dd.DataFrame) -> ParallelPostFit:
+def train_model_and_evaluate(train_data: dd.DataFrame, test_data: dd.DataFrame) -> TabularPredictor:
     train_data: pd.DataFrame = train_data.compute()
     test_data: pd.DataFrame = test_data.compute()
 
@@ -31,6 +31,7 @@ def train_model(train_data: dd.DataFrame, test_data: dd.DataFrame) -> ParallelPo
 
     # Ewaluacja modelu
     performance: dict = predictor.evaluate(test_data)
+    y_pred: np.ndarray = predictor.predict(test_data)
     y_score: np.ndarray = predictor.predict_proba(test_data)
 
     # Przygotowanie danych do wizualizacji w WANDB
@@ -45,6 +46,15 @@ def train_model(train_data: dd.DataFrame, test_data: dd.DataFrame) -> ParallelPo
 
     # Logowanie krzywej ROC
     wandb.log({"ROC Curve": wandb.plot.roc_curve(y_true=test_data[label], y_probas=y_score)})
+
+    # Generowanie i logowanie macierzy omyłek
+    cm = confusion_matrix(test_data[label], y_pred)
+    cm_display = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=predictor.class_labels)
+
+    fig, ax = plt.subplots(figsize=(10, 10))
+    cm_display.plot(ax=ax)
+    plt.title("Confusion Matrix")
+    wandb.log({"Confusion Matrix": wandb.Image(fig)})
 
     # Zakończenie sesji WANDB
     wandb.finish()
