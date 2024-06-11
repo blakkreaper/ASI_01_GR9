@@ -1,99 +1,114 @@
-# ASI_01_GR9
 
-## Overview
+# Project Name
 
-This is your new Kedro project with Kedro-Viz setup, which was generated using `kedro 0.19.3`.
+## Table of Contents
 
-Take a look at the [Kedro documentation](https://docs.kedro.org) to get started.
+- [Introduction](#introduction)
+- [Installation](#installation)
+- [Running the Pipeline](#running-the-pipeline)
+- [Running the API](#running-the-api)
+- [Running Streamlit](#running-streamlit)
+- [Dependencies](#dependencies)
+- [Contributing](#contributing)
+- [License](#license)
 
-## Rules and guidelines
+## Introduction
 
-In order to get the best out of the template:
+This project aims to [brief description of the project]. It integrates various powerful tools and libraries to deliver a comprehensive solution for [problem the project solves]. Key technologies used include Kedro for pipeline management, FastAPI for API development, Streamlit for creating interactive web applications, and others.
 
-* Don't remove any lines from the `.gitignore` file we provide
-* Make sure your results can be reproduced by following a [data engineering convention](https://docs.kedro.org/en/stable/faq/faq.html#what-is-data-engineering-convention)
-* Don't commit data to your repository
-* Don't commit any credentials or your local configuration to your repository. Keep all your credentials and local configuration in `conf/local/`
+## Installation
 
-## How to install dependencies
+To set up the project, follow these steps:
 
-Declare any dependencies in `requirements.txt` for `pip` installation.
+1. **Clone the repository**:
+    ```bash
+    git clone https://github.com/your_username/your_repository.git
+    cd your_repository
+    ```
 
-To install them, run:
+2. **Create and activate a virtual environment**:
+    ```bash
+    python -m venv venv
+    source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+    ```
 
-```
+3. **Install the dependencies**:
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+## Running the Pipeline
+
+To execute the pipeline using Kedro:
+
+1. **Activate the virtual environment** (if not already activated):
+    ```bash
+    source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+    ```
+
+2. **Run the pipeline**:
+    ```bash
+    kedro run
+    ```
+
+## Running the API
+
+To start the FastAPI server:
+
+1. **Activate the virtual environment** (if not already activated):
+    ```bash
+    source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+    ```
+
+2. **Start the FastAPI server**:
+    ```bash
+    uvicorn app.main:app --reload
+    ```
+
+3. **Access the API documentation**:
+    Open your web browser and navigate to [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs).
+
+## Running Streamlit
+
+To launch the Streamlit application:
+
+1. **Activate the virtual environment** (if not already activated):
+    ```bash
+    source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+    ```
+
+2. **Start the Streamlit application**:
+    ```bash
+    streamlit run app/streamlit_app.py
+    ```
+
+3. **Access the Streamlit application**:
+    Open your web browser and navigate to [http://localhost:8501](http://localhost:8501).
+
+## Dependencies
+
+This project depends on the following major libraries:
+
+- **Kedro**: For managing data pipelines
+- **FastAPI**: For developing the API
+- **Streamlit**: For creating interactive web applications
+- **Weights & Biases (wandb)**: For experiment tracking and model management
+- **AutoGluon**: For automating machine learning tasks
+
+All dependencies are listed in the `requirements.txt` file. To install them, run:
+
+```bash
 pip install -r requirements.txt
 ```
 
-## How to run your Kedro pipeline
+## Contributing
 
-You can run your Kedro project with:
+We welcome contributions! Please read our [contributing guidelines](CONTRIBUTING.md) for more information on how to get started.
 
-```
-kedro run
-```
+## License
 
-## How to test your Kedro project
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
-Have a look at the files `src/tests/test_run.py` and `src/tests/pipelines/test_data_science.py` for instructions on how to write your tests. Run the tests as follows:
+---
 
-```
-pytest
-```
-
-To configure the coverage threshold, look at the `.coveragerc` file.
-
-## Project dependencies
-
-To see and update the dependency requirements for your project use `requirements.txt`. Install the project requirements with `pip install -r requirements.txt`.
-
-[Further information about project dependencies](https://docs.kedro.org/en/stable/kedro_project_setup/dependencies.html#project-specific-dependencies)
-
-## How to work with Kedro and notebooks
-
-> Note: Using `kedro jupyter` or `kedro ipython` to run your notebook provides these variables in scope: `catalog`, `context`, `pipelines` and `session`.
->
-> Jupyter, JupyterLab, and IPython are already included in the project requirements by default, so once you have run `pip install -r requirements.txt` you will not need to take any extra steps before you use them.
-
-### Jupyter
-To use Jupyter notebooks in your Kedro project, you need to install Jupyter:
-
-```
-pip install jupyter
-```
-
-After installing Jupyter, you can start a local notebook server:
-
-```
-kedro jupyter notebook
-```
-
-### JupyterLab
-To use JupyterLab, you need to install it:
-
-```
-pip install jupyterlab
-```
-
-You can also start JupyterLab:
-
-```
-kedro jupyter lab
-```
-
-### IPython
-And if you want to run an IPython session:
-
-```
-kedro ipython
-```
-
-### How to ignore notebook output cells in `git`
-To automatically strip out all output cell contents before committing to `git`, you can use tools like [`nbstripout`](https://github.com/kynan/nbstripout). For example, you can add a hook in `.git/config` with `nbstripout --install`. This will run `nbstripout` before anything is committed to `git`.
-
-> *Note:* Your output cells will be retained locally.
-
-[Further information about using notebooks for experiments within Kedro projects](https://docs.kedro.org/en/develop/notebooks_and_ipython/kedro_and_notebooks.html).
-## Package your Kedro project
-
-[Further information about building project documentation and packaging your project](https://docs.kedro.org/en/stable/tutorial/package_a_project.html).
+For any questions or further assistance, feel free to reach out. Happy coding!
