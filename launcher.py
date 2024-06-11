@@ -9,7 +9,7 @@ logging.basicConfig(level=logging.INFO, filename='launcher.log', filemode='w',
                     format='%(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-API_PORT = 8001
+API_PORT = 8000
 API_URL = f"http://localhost:{API_PORT}/"
 
 
