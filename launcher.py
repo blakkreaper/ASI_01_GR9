@@ -1,84 +1,63 @@
 import subprocess
-import requests
-import time
-import logging
+import threading
+import signal
 import sys
+import time
+import requests
 
-# Konfiguracja logowania
-logging.basicConfig(level=logging.INFO, filename='launcher.log', filemode='w',
-                    format='%(name)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
+# Function to run FastAPI
+def run_fastapi():
+    process = subprocess.Popen(["uvicorn", "app:app", "--reload"])
+    return process
 
-API_PORT = 8000
-API_URL = f"http://localhost:{API_PORT}/"
+# Function to run Streamlit
+def run_streamlit():
+    process = subprocess.Popen(["streamlit", "run", "streamlit.py"])
+    return process
 
-
-def start_fastapi():
-    logger.info("Starting FastAPI server...")
-    api_process = subprocess.Popen(["python", "app.py"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    # for line in api_process.stdout:
-    #     logger.info(line.decode().strip())
-    # for line in api_process.stderr:
-    #     logger.error(line.decode().strip())
-    return api_process
-
-
-def start_streamlit():
-    logger.info("Starting Streamlit application...")
-    streamlit_process = subprocess.Popen(["streamlit", "run", "streamlit.py"], stdout=subprocess.PIPE,
-                                         stderr=subprocess.PIPE)
-    for line in streamlit_process.stdout:
-        logger.info(line.decode().strip())
-    for line in streamlit_process.stderr:
-        logger.error(line.decode().strip())
-    return streamlit_process
-
-
-def wait_for_api():
-    logger.info("Waiting for API to be available...")
-    while True:
+# Function to check if FastAPI is running
+def check_fastapi_running(url, timeout=60):
+    start_time = time.time()
+    while time.time() - start_time < timeout:
         try:
-            response = requests.get(API_URL)
-            response.raise_for_status()
+            response = requests.get(url)
             if response.status_code == 200:
-                logger.info("API is running!")
-                break
-        except requests.RequestException as e:
-            logger.error(f"Error while checking API status: {e}")
-            time.sleep(1)
+                return True
+        except requests.ConnectionError:
+            pass
+        time.sleep(1)
+    return False
 
-
-def stop_process(process, name):
-    if process:
-        logger.info(f"Stopping {name}...")
-        process.terminate()
-        process.wait()
-
-
-def main():
-    api_process = None
-    streamlit_process = None
-
-    try:
-        # Uruchom FastAPI w osobnym wątku
-        api_process = start_fastapi()
-
-        # Czekaj na dostępność API
-        wait_for_api()
-
-        # Uruchom Streamlit
-        streamlit_process = start_streamlit()
-
-        # Poczekaj na zakończenie Streamlit
-        streamlit_process.wait()
-
-    except Exception as e:
-        logger.error(f"An error occurred: {e}")
-    finally:
-        # Zakończ oba procesy
-        stop_process(api_process, "FastAPI")
-        stop_process(streamlit_process, "Streamlit")
-
+# Function to handle termination signals
+def signal_handler(sig, frame):
+    print("Terminating processes...")
+    if fastapi_process:
+        fastapi_process.terminate()
+    if streamlit_process:
+        streamlit_process.terminate()
+    sys.exit(0)
 
 if __name__ == "__main__":
-    main()
+    # Set up signal handler for graceful termination
+    signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)
+
+    # Start FastAPI in a separate thread
+    fastapi_process = run_fastapi()
+
+    # Check if FastAPI is running
+    fastapi_url = "http://127.0.0.1:8000/docs"
+    if check_fastapi_running(fastapi_url):
+        print("FastAPI is running. Starting Streamlit...")
+        streamlit_process = run_streamlit()
+    else:
+        print("Failed to start FastAPI within the timeout period.")
+        fastapi_process.terminate()
+        sys.exit(1)
+
+    # Wait for processes to finish (or be terminated)
+    while True:
+        try:
+            time.sleep(1)
+        except KeyboardInterrupt:
+            signal_handler(signal.SIGINT, None)

@@ -5,19 +5,39 @@ import wandb
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 import matplotlib.pyplot as plt
 from autogluon.tabular import TabularPredictor
+import json 
+import os
+from typing import Any, Dict
 
 
 def train_model_and_evaluate(train_data: dd.DataFrame, test_data: dd.DataFrame) -> TabularPredictor:
     train_data: pd.DataFrame = train_data.compute()
     test_data: pd.DataFrame = test_data.compute()
 
-    hyperparameters = {
-        'GBM': {'extra_trees': True},
-        'RF': {'n_estimators': 100, 'max_depth': 10},
-        'KNN': {'weights': 'uniform', 'n_neighbors': 5},
-        'CAT': {'iterations': 10000, 'learning_rate': 0.01},
-        'XGB': {'booster': 'gbtree', 'verbosity': 1},
-    }
+    # Ścieżka do pliku z hiperparametrami
+hyperparams_path = "data/05_model_input/hyperparameters.json"
+
+# Domyślne hiperparametry
+default_hyperparameters = {
+    'XGB': {'booster': 'gbtree', 'verbosity': 1},
+    'GBM': {'extra_trees': True},
+    'RF': {'n_estimators': 100, 'max_depth': 10},
+    'KNN': {'weights': 'uniform', 'n_neighbors': 5},
+    'CAT': {'iterations': 10000, 'learning_rate': 0.01}
+}
+
+# Sprawdzenie, czy plik istnieje i załadowanie hiperparametrów
+if os.path.exists(hyperparams_path):
+    with open(hyperparams_path, "r") as f:
+        loaded_hyperparameters = json.load(f)
+        
+    # Uzupełnienie brakujących wartości domyślnymi
+    hyperparameters = {}
+    for key, default_params in default_hyperparameters.items():
+        loaded_params = loaded_hyperparameters.get(key, {})
+        hyperparameters[key] = {param: loaded_params.get(param, default_value) for param, default_value in default_params.items()}
+else:
+    hyperparameters = default_hyperparameters
 
     # Inicjalizacja sesji WANDB
     wandb.init(project="depression_prediction", entity="mlody1230")
