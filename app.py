@@ -16,6 +16,9 @@ app = FastAPI()
 project_path: str = ""
 bootstrap_project(project_path)
 
+
+
+
 @app.post("/upload_training_data")
 async def upload_training_data(file: UploadFile = File(...)):
     try:
@@ -99,7 +102,7 @@ async def upload_prediction_data(file: UploadFile = File(...)):
 #     except Exception as e:
 #         raise HTTPException(status_code=500, detail=str(e))
 
-
+#
 @app.post("/upload_hyperparameters_and_run_pipeline")
 async def upload_hyperparameters_and_run_pipeline(hyperparams_file: UploadFile = File(...)):
     """
@@ -155,29 +158,73 @@ async def upload_hyperparameters_and_run_pipeline(hyperparams_file: UploadFile =
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-
 class Hyperparameters(BaseModel):
-    GBM: Dict[str, Any] = None
-    RF: Dict[str, Any] = None
-    KNN: Dict[str, Any] = None
-    CAT: Dict[str, Any] = None
-    XGB: Dict[str, Any] = None
+    XGB: dict = {}
+    GBM: dict = {}
+    RF: dict = {}
+    KNN: dict = {}
+    CAT: dict = {}
+
+default_hyperparameters = {
+        'XGB': {'booster': 'gbtree', 'verbosity': 1},
+        'GBM': {'extra_trees': True},
+        'RF': {'n_estimators': 100, 'max_depth': 10},
+        'KNN': {'weights': 'uniform', 'n_neighbors': 5},
+        'CAT': {'iterations': 10000, 'learning_rate': 0.01}
+    }
 
 @app.post("/upload_hyperparameters")
 async def upload_hyperparameters(hyperparams: Hyperparameters):
     try:
         # Directory where hyperparameters will be saved
         save_directory = "data/05_model_input/"
-        
-        # Create directory if it doesn't exist
         os.makedirs(save_directory, exist_ok=True)
-        
         hyperparams_path = os.path.join(save_directory, "hyperparameters.json")
 
-        # Save the hyperparameters to a file
+        # Load existing hyperparameters if file exists
+        if os.path.exists(hyperparams_path):
+            with open(hyperparams_path, "r") as f:
+                existing_hyperparams = json.load(f)
+                print(existing_hyperparams)
+            for model in default_hyperparameters:
+                if model in existing_hyperparams:
+                    default_hyperparameters[model].update(existing_hyperparams[model])
+
+        # Merge provided hyperparameters with default hyperparameters
+        updated_hyperparams = default_hyperparameters.copy()
+        provided_hyperparams = hyperparams.dict()
+        for model, params in provided_hyperparams.items():
+            if params is not None:  # Ensure that params is not None
+                for param, value in params.items():
+                    if value is not None:
+                        updated_hyperparams[model][param] = value
+
+        # Save the updated hyperparameters to a file
         with open(hyperparams_path, "w") as f:
-            json.dump(hyperparams.dict(), f, indent=4)
+            json.dump(updated_hyperparams, f, indent=4)
 
         return {"status": "Hyperparameters saved successfully"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+
+
+# @app.post("/upload_hyperparameters")
+# async def upload_hyperparameters(hyperparams: Hyperparameters):
+#     try:
+#         # Directory where hyperparameters will be saved
+#         save_directory = "data/05_model_input/"
+        
+#         # Create directory if it doesn't exist
+#         os.makedirs(save_directory, exist_ok=True)
+        
+#         hyperparams_path = os.path.join(save_directory, "hyperparameters.json")
+
+#         # Save the hyperparameters to a file
+#         with open(hyperparams_path, "w") as f:
+#             json.dump(hyperparams.dict(), f, indent=4)
+
+#         return {"status": "Hyperparameters saved successfully"}
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=str(e))
