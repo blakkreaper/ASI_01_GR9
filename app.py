@@ -3,17 +3,18 @@ import os
 import shutil
 import json
 from typing import Hashable, Any, Dict
-
+import wandb
 import pandas as pd
 from fastapi import FastAPI, HTTPException, UploadFile, File
 from fastapi.responses import StreamingResponse
 from kedro.framework.session import KedroSession
 from kedro.framework.startup import bootstrap_project
 from pydantic import BaseModel
+from pathlib import Path
 
 app = FastAPI()
 
-project_path: str = ""
+project_path = Path.cwd()
 bootstrap_project(project_path)
 
 
@@ -57,6 +58,77 @@ async def upload_prediction_data(file: UploadFile = File(...)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     
+
+@app.get("/get_pipelines")
+async def get_pipelines():
+    try:
+        from src.asi_01_gr9.pipeline_registry import register_pipelines
+        pipelines = register_pipelines()
+        return list(pipelines.keys())
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/run_pipeline")
+async def run_pipeline(pipeline_data: dict):
+    try:
+        pipeline_name = pipeline_data.get("pipeline_name")
+        if not pipeline_name:
+            raise HTTPException(status_code=400, detail="Pipeline name not provided")
+
+        with KedroSession.create(project_path=project_path) as session:
+            result = session.run(pipeline_name=pipeline_name)
+        
+        return {"status": "Pipeline executed", "result": result}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+
+@app.post("/run_training")
+async def run_training():
+    try:
+        print("wandbinit")
+        wandb.init(project="depression_prediction", entity="s22807")
+        print("wandbinitialised")
+        run_id = wandb.run.id
+        with KedroSession.create(project_path=project_path) as session:
+            result = session.run(pipeline_name="training_train_model")
+        wandb.finish()
+        wandb_url = f"https://wandb.ai/s22807/depression_prediction/runs/{run_id}"
+        
+        return {"status": "Pipeline executed", "result": result, "wandb_url": wandb_url}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/run_preprocessing")
+async def run_preprocessing():
+    try:
+        with KedroSession.create(project_path=project_path) as session:
+            result = session.run(pipeline_name="training_data_preprocessing")
+        
+        return {"status": "Pipeline executed", "result": result}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/run_prediction")
+async def run_prediction():
+    try:
+        with KedroSession.create(project_path=project_path) as session:
+            result = session.run(pipeline_name="prediction_pipeline")
+        
+        return {"status": "Pipeline executed", "result": result}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+
+
+
+
+
+
+
+
 # @app.post("/upload_file")
 # async def upload_file(file: UploadFile = File(...)):
 #     try:

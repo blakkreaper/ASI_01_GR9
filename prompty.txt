@@ -1,0 +1,208 @@
+"detail":"[36mray::_sub_fit()[39m (pid=8588, ip=127.0.0.1)
+  File "python\ray\_raylet.pyx", line 1889, in ray._raylet.execute_task
+  File "C:\ProgramData\Anaconda3\envs\ASI2\lib\site-packages\autogluon\tabular\predictor\predictor.py", line 4971, in _sub_fit
+    train_data, val_data = generate_train_test_split_combined(
+  File "C:\ProgramData\Anaconda3\envs\ASI2\lib\site-packages\autogluon\core\utils\utils.py", line 394, in generate_train_test_split_combined
+    train_data, test_data, y_train, y_test = generate_train_test_split(
+  File "C:\ProgramData\Anaconda3\envs\ASI2\lib\site-packages\autogluon\core\utils\utils.py", line 478, in generate_train_test_split
+    X_train, X_test, y_train, y_test = train_test_split(
+  File "C:\ProgramData\Anaconda3\envs\ASI2\lib\site-packages\sklearn\utils\_param_validation.py", line 213, in wrapper
+    return func(*args, **kwargs)
+  File "C:\ProgramData\Anaconda3\envs\ASI2\lib\site-packages\sklearn\model_selection\_split.py", line 2683, in train_test_split
+    return list(
+  File "C:\ProgramData\Anaconda3\envs\ASI2\lib\site-packages\sklearn\model_selection\_split.py", line 2685, in <genexpr>
+    (_safe_indexing(a, train), _safe_indexing(a, test)) for a in arrays
+  File "C:\ProgramData\Anaconda3\envs\ASI2\lib\site-packages\sklearn\utils\__init__.py", line 411, in _safe_indexing
+    return _array_indexing(X, indices, indices_dtype, axis=axis)
+  File "C:\ProgramData\Anaconda3\envs\ASI2\lib\site-packages\sklearn\utils\__init__.py", line 208, in _array_indexing
+    return array[key, ...] if axis == 0 else array[:, key]
+  File "C:\ProgramData\Anaconda3\envs\ASI2\lib\site-packages\pandas\core\arrays\arrow\array.py", line 618, in __getitem__
+    value = self._pa_array[item]
+  File "pyarrow\\table.pxi", line 305, in pyarrow.lib.ChunkedArray.__getitem__
+TypeError: only integer scalar arrays can be converted to a scalar index"
+
+from autogluon.tabular import TabularPredictor
+
+hyperparameters = {
+    'NN': {'num_epochs': 10, 'learning_rate': 1e-3, 'dropout_prob': 0.1},
+    'GBM': {'num_boost_round': 100, 'learning_rate': 0.05, 'num_leaves': 31},
+    'CAT': {'iterations': 500, 'depth': 6, 'learning_rate': 0.1},
+    'XGB': {'n_estimators': 100, 'learning_rate': 0.1, 'max_depth': 6},
+    'RF': {'n_estimators': 100, 'max_depth': 15},
+    'XT': {'n_estimators': 100, 'max_depth': 15},
+    'KNN': {'n_neighbors': 5, 'weights': 'uniform', 'algorithm': 'auto'},
+    'LR': {},
+    'FASTAI': {'epochs': 10, 'lr': 1e-2}
+}
+
+label = 'your_label_column'
+train_data = your_dataframe
+
+predictor = TabularPredictor(label=label, eval_metric='accuracy').fit(
+    train_data=train_data,
+    hyperparameters=hyperparameters,
+    presets='best_quality',
+    time_limit=3600
+)
+
+hyperparameters = {
+    'NN': {
+        'num_epochs': 10,
+        'learning_rate': 1e-3,
+        'dropout_prob': 0.1,
+    },
+    'GBM': {
+        'num_boost_round': 100,
+        'learning_rate': 0.05,
+        'num_leaves': 31,
+    },
+    'CAT': {
+        'iterations': 500,
+        'depth': 6,
+        'learning_rate': 0.1,
+    },
+    'XGB': {
+        'n_estimators': 100,
+        'learning_rate': 0.1,
+        'max_depth': 6,
+    },
+    'RF': {
+        'n_estimators': 100,
+        'max_depth': 15,
+    },
+    'XT': {
+        'n_estimators': 100,
+        'max_depth': 15,
+    },
+    'KNN': {
+        'n_neighbors': 5,
+        'weights': 'uniform',
+        'algorithm': 'auto',
+    },
+    'LR': {},
+    'FASTAI': {
+        'epochs': 10,
+        'lr': 1e-2,
+    }
+}
+
+
+Oto przegląd twoich hiperparametrów z uwzględnieniem ich zgodności z odpowiednimi modelami:
+
+XGBoost (XGB):
+
+booster: Wartość 'gbtree' jest poprawna.
+verbosity: Wartość 1 jest poprawna (0: silent, 1: warning, 2: info, 3: debug).
+LightGBM (GBM):
+
+extra_trees: Wartość True jest poprawna, chociaż nie jest to typowy hiperparametr w LightGBM. Może to być niestandardowa opcja, ale warto to sprawdzić w dokumentacji LightGBM.
+Random Forest (RF):
+
+n_estimators: Wartość 100 jest poprawna.
+max_depth: Wartość 10 jest poprawna.
+K-Nearest Neighbors (KNN):
+
+weights: Wartość 'uniform' jest poprawna.
+n_neighbors: Wartość 5 jest poprawna.
+CatBoost (CAT):
+
+iterations: Wartość 10000 jest poprawna, choć dość wysoka. Może warto zacząć od mniejszej wartości, np. 1000, aby skrócić czas trenowania.
+learning_rate: Wartość 0.01 jest poprawna.
+Uwaga na temat extra_trees w LightGBM
+extra_trees może nie być standardowym hiperparametrem w LightGBM. Zwykle LightGBM ma parametry takie jak boosting_type, num_leaves, learning_rate, itp. Sprawdź, czy extra_trees jest rzeczywiście wspieranym parametrem w wersji LightGBM, której używasz. Może to być niestandardowa opcja dodana przez zespół AutoGluon.
+
+Propozycja dla LightGBM
+Jeśli extra_trees nie jest wspieranym parametrem, możesz rozważyć użycie innych popularnych hiperparametrów:
+'GBM': {'boosting_type': 'gbdt', 'num_leaves': 31, 'learning_rate': 0.05, 'n_estimators': 100}
+
+
+
+------------------------------------------------------------------------------------------
+def train_model_and_evaluate(train_data: dd.DataFrame, test_data: dd.DataFrame) -> TabularPredictor:
+    # Konwersja danych z Dask DataFrame na Pandas DataFrame
+    train_data: pd.DataFrame = train_data.compute()
+    test_data: pd.DataFrame = test_data.compute()
+
+    # Sprawdzenie typów danych
+    print("Train data type:", type(train_data))
+    print("Test data type:", type(test_data))
+
+    # Konwersja na Pandas DataFrame, jeśli dane są w formacie pyarrow
+    if isinstance(train_data, pd.DataFrame):
+        train_data = train_data.convert_dtypes()
+
+    if isinstance(test_data, pd.DataFrame):
+        test_data = test_data.convert_dtypes()
+
+    # Ścieżka do pliku z hiperparametrami
+    hyperparams_path = "data/05_model_input/hyperparameters.json"
+    
+    # Domyślne hiperparametry
+    default_hyperparameters = {
+        'GBM': {'extra_trees': True},
+        'RF': {'n_estimators': 100, 'max_depth': 10},
+        'KNN': {'weights': 'uniform', 'n_neighbors': 5},
+        'CAT': {'iterations': 10000, 'learning_rate': 0.01},
+        'XGB': {'booster': 'gbtree', 'verbosity': 1}
+    }
+    
+    # Sprawdzenie, czy plik istnieje i załadowanie hiperparametrów
+    if os.path.exists(hyperparams_path):
+        with open(hyperparams_path, "r") as f:
+            loaded_hyperparameters = json.load(f)
+            
+        # Uzupełnienie brakujących wartości domyślnymi
+        hyperparameters = {}
+        for key, default_params in default_hyperparameters.items():
+            loaded_params = loaded_hyperparameters.get(key, {})
+            hyperparameters[key] = {param: loaded_params.get(param, default_value) for param, default_value in default_params.items()}
+    else:
+        hyperparameters = default_hyperparameters
+
+    # Inicjalizacja sesji WANDB
+    print(hyperparameters)
+    wandb.init(project="depression_prediction", entity="s22807")
+    label: str = 'Class'
+    
+    # Trenowanie modelu z AutoGluon
+    predictor: TabularPredictor = TabularPredictor(label=label, eval_metric='accuracy').fit(
+        train_data,
+        hyperparameters=hyperparameters,
+        presets='best_quality',
+        time_limit=3600
+    )
+    
+    # Ewaluacja modelu
+    performance: dict = predictor.evaluate(test_data)
+    y_pred: np.ndarray = predictor.predict(test_data)
+    y_score: np.ndarray = predictor.predict_proba(test_data)
+    
+    # Przygotowanie danych do wizualizacji w WANDB
+    data_for_plot = [[metric, value] for metric, value in performance.items()]
+    table = wandb.Table(data=data_for_plot, columns=["Metric", "Value"])
+    
+    # Logowanie wyników do WANDB
+    wandb.log({"Evaluation Metrics": table})
+    
+    # Logowanie wykresu przy użyciu wandb.plot.bar
+    wandb.log({"Metrics Bar Chart": wandb.plot.bar(table, "Metric", "Value", title="Performance Metrics")})
+    
+    # Logowanie krzywej ROC
+    wandb.log({"ROC Curve": wandb.plot.roc_curve(test_data[label].values, y_score)})
+    
+    # Generowanie i logowanie macierzy omyłek
+    cm = confusion_matrix(test_data[label], y_pred)
+    cm_display = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=predictor.class_labels)
+    
+    fig, ax = plt.subplots(figsize=(10, 10))
+    cm_display.plot(ax=ax)
+    plt.title("Confusion Matrix")
+    wandb.log({"Confusion Matrix": wandb.Image(fig)})
+    
+    # Zakończenie sesji WANDB
+    wandb.finish()
+    
+    # Tabela ze statystykami algorytmów
+    print(predictor.leaderboard())
+    
+    return predictor

@@ -16,8 +16,6 @@ def upload_directory(path, use_for_training):
                     response = requests.post(f"{API_URL}{endpoint}", files=files)
                     if response.status_code != 200:
                         st.error(f"Error uploading file {file}: {response.text}")
-                    else:
-                        st.success(f"Successfully uploaded file {file}")
 
 def main():
     st.title("Data Upload and Model Operation")
@@ -30,20 +28,23 @@ def main():
     )
     save_directory = "data/05_model_input/"
     hyperparams_path = os.path.join(save_directory, "hyperparameters.json")
+    existing_hyperparams = {}
     if os.path.exists(hyperparams_path):
-            with open(hyperparams_path, "r") as f:
-                existing_hyperparams = json.load(f)
+        with open(hyperparams_path, "r") as f:
+            existing_hyperparams = json.load(f)
+    
     if option:
         st.header(f"Configure hyperparameters for {option}")
 
         form = st.form(key=f"{option}_form")
+
         hyperparameters = {
-                'XGB': {'booster': 'gbtree', 'verbosity': 1},
-                'GBM': {'extra_trees': True},
-                'RF': {'n_estimators': 100, 'max_depth': 10},
-                'KNN': {'weights': 'uniform', 'n_neighbors': 5},
-                'CAT': {'iterations': 10000, 'learning_rate': 0.01}
-            }
+        'GBM': {'extra_trees': True},
+        'RF': {'n_estimators': 100, 'max_depth': 10},
+        'KNN': {'weights': 'uniform', 'n_neighbors': 5},
+        'CAT': {'iterations': 10000, 'learning_rate': 0.01},
+        'XGB': {'booster': 'gbtree', 'verbosity': 1}
+        }
         if existing_hyperparams:
             for model in existing_hyperparams:
                 hyperparameters[model].update(existing_hyperparams[model])
@@ -69,11 +70,9 @@ def main():
             hyperparameters = {'XGB': {'booster': booster, 'verbosity': verbosity}}
 
         submit_button = form.form_submit_button(label="Save hyperparameters")
-        st.error(hyperparameters)
         if submit_button:
             # Ensure hyperparameters is not None
             if hyperparameters:
-                st.error(hyperparameters)
                 response = requests.post(f"{API_URL}/upload_hyperparameters", json=hyperparameters)
                 if response.status_code == 200:
                     st.success("Hyperparameters saved!")
@@ -82,6 +81,40 @@ def main():
                     st.json(response.json())
             else:
                 st.error("No hyperparameters to save!")
+
+    # Section to select and run pipeline
+    st.header("Run Pipeline")
+    
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        if st.button("Run training_data_preprocessing"):
+            response = requests.post(f"{API_URL}/run_preprocessing")
+            if response.status_code == 200:
+                st.success("Pipeline training_data_preprocessing executed successfully!")
+            else:
+                st.error("Pipeline training_data_preprocessing execution failed!")
+                st.json(response.json())
+    
+    with col2:
+        if st.button("Run training_train_model"):
+            response = requests.post(f"{API_URL}/run_training")
+            if response.status_code == 200:
+                st.success("Pipeline training_train_model executed successfully!")
+                wandb_url = response.json().get("wandb_url")
+                if wandb_url:
+                    st.markdown(f"[View training logs in WandB]({wandb_url})")
+            else:
+                st.error("Pipeline training_train_model execution failed!")
+                st.json(response.json())
+
+    with col3:
+        if st.button("Run prediction_pipeline"):
+            response = requests.post(f"{API_URL}/run_prediction")
+            if response.status_code == 200:
+                st.success("Pipeline prediction_pipeline executed successfully!")
+            else:
+                st.error("Pipeline prediction_pipeline execution failed!")
+                st.json(response.json())
 
     # Section to upload data and choose usage
     st.header("Upload Data for Training or Prediction")
