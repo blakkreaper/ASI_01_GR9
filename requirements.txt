@@ -13,8 +13,7 @@ torchvision==0.16.2
 fastapi~=0.110.1
 pydantic~=2.6.4
 streamlit
-json
-request
+requests
 uvicorn
 autogluon~=1.1.0
 scikit-learn~=1.3.0
