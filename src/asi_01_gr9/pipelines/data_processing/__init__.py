@@ -129,3 +129,42 @@ concat_parquet_node = node(
     },
     outputs=["train_data", "test_data"]
 )
+
+# PREDICTION -----------------------------------------------------------------------------
+
+predict_raw_node = node(
+    func=extract_to_parquet,
+    inputs={
+        "raw_data_dir": "params:prediction_participants_raw_dir",
+    },
+    outputs="prediction_participant_raw_parquet"
+)
+
+predict_joined_anxious_node = node(
+    func=transform_parquet,
+    inputs={
+        "parquet_file": "prediction_participant_raw_parquet",
+        "column_mapping": "params:column_mapping_participants",
+        "columns_to_select": "params:columns_to_select_participants"
+    },
+    outputs="prediction_trans_participants_parquet"
+)
+
+predict_impute_drop_node = node(
+    func=impute_and_drop,
+    inputs={
+        "data": "prediction_trans_participants_parquet",
+        "columns_to_impute": "params:columns_to_impute",
+        "columns_to_drop": "params:columns_to_drop_participants",
+        "strategy": "params:strategy",
+    },
+    outputs="prediction_imputed_parquet"
+)
+
+predict_features_engineering = node(
+    func=features_engineering,
+    inputs={
+        "data": "prediction_imputed_parquet",
+    },
+    outputs="prediction_feature_engineering_parquet"
+)

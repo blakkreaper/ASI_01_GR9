@@ -1,23 +1,26 @@
+import json
+
 import dask.dataframe as dd
 import pandas as pd
 import numpy as np
 import wandb
+from kedro_datasets.json import JSONDataset
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 import matplotlib.pyplot as plt
 from autogluon.tabular import TabularPredictor
 
 
-def train_model_and_evaluate(train_data: dd.DataFrame, test_data: dd.DataFrame) -> TabularPredictor:
+def train_model_and_evaluate(train_data: dd.DataFrame, test_data: dd.DataFrame, hyperparameters: JSONDataset) -> TabularPredictor:
     train_data: pd.DataFrame = train_data.compute()
     test_data: pd.DataFrame = test_data.compute()
 
-    hyperparameters = {
-        'GBM': {'extra_trees': True},
-        'RF': {'n_estimators': 100, 'max_depth': 10},
-        'KNN': {'weights': 'uniform', 'n_neighbors': 5},
-        'CAT': {'iterations': 10000, 'learning_rate': 0.01},
-        'XGB': {'booster': 'gbtree', 'verbosity': 1},
-    }
+    # hyperparameters = {
+    #     'GBM': {'extra_trees': True},
+    #     'RF': {'n_estimators': 100, 'max_depth': 10},
+    #     'KNN': {'weights': 'uniform', 'n_neighbors': 5},
+    #     'CAT': {'iterations': 10000, 'learning_rate': 0.01},
+    #     'XGB': {'booster': 'gbtree', 'verbosity': 1},
+    # }
 
     # Inicjalizacja sesji WANDB
     wandb.init(project="depression_prediction", entity="mlody1230")
@@ -63,3 +66,10 @@ def train_model_and_evaluate(train_data: dd.DataFrame, test_data: dd.DataFrame) 
     print(predictor.leaderboard())
 
     return predictor
+
+
+def predict_data(predictor: TabularPredictor, data: dd.DataFrame) -> dd.DataFrame:
+    df_for_prediction: pd.DataFrame = data.compute()
+    result: pd.DataFrame = predictor.predict(df_for_prediction)
+    p_result_final: pd.DataFrame = pd.concat([df_for_prediction, result], axis=1)
+    return p_result_final

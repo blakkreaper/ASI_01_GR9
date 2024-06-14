@@ -149,4 +149,57 @@ best_model:
   type: pickle.PickleDataset
   filepath: data/06_models/best_model.pkl
 
+hyperparameters:
+  type: json.JSONDataset
+  filepath: data/01_raw/hyperparameters.json
 
+
+# Prediction -----------------------------------------------------------
+prediction_participant_raw_parquet:
+  type: dask.ParquetDataset
+  filepath: data/02_intermediate/prediction/participant_raw.parquet
+  load_args:
+    engine: pyarrow
+  save_args:
+    engine: pyarrow
+    write_index: False
+    compression: 'snappy'
+    row_group_size: 10000
+
+prediction_trans_participants_parquet:
+  type: dask.ParquetDataset
+  filepath: data/03_primary/prediction/trans_participants.parquet
+  load_args:
+    engine: pyarrow
+  save_args:
+    engine: pyarrow
+    write_index: False
+    compression: 'snappy'
+    row_group_size: 10000
+
+prediction_imputed_parquet:
+  type: dask.ParquetDataset
+  filepath: data/04_feature/prediction/impute_drop.parquet
+  save_args:
+    engine: pyarrow
+    write_index: False
+    compression: 'snappy'
+    row_group_size: 10000
+
+prediction_feature_engineering_parquet:
+  type: dask.ParquetDataset
+  filepath: data/04_feature/prediction/feature_engineering.parquet
+  save_args:
+    engine: pyarrow
+    write_index: False
+    compression: 'snappy'
+    row_group_size: 10000
+
+p_result:
+  type: kedro_datasets.pandas.csv_dataset.CSVDataset
+  filepath: data/07_model_output/p_result.csv
+  save_args:
+    index: False
+    sep: '~'
+    decimal: .
+    encoding: "utf-8"

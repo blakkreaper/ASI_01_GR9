@@ -4,7 +4,8 @@ from asi_01_gr9.pipelines import anxious_participants_raw_node, anxious_joined_a
     anxious_features_engineering, depressive_participants_raw_node, depressive_joined_anxious_node, \
     depressive_impute_drop_node, depressive_features_engineering, control_participants_raw_node, \
     control_joined_anxious_node, control_impute_drop_node, control_features_engineering
-from asi_01_gr9.pipelines.data_processing import concat_parquet_node
+from asi_01_gr9.pipelines.data_processing import concat_parquet_node, predict_raw_node, predict_joined_anxious_node, \
+    predict_impute_drop_node, predict_features_engineering
 
 
 def create_preprocess_pipeline(**kwargs) -> Pipeline:
@@ -23,3 +24,11 @@ def create_preprocess_pipeline(**kwargs) -> Pipeline:
          control_features_engineering,
          concat_parquet_node,
          ])
+
+
+def create_predict_preprocess_pipeline(**kwargs) -> Pipeline:
+    return Pipeline([predict_raw_node,
+                     predict_joined_anxious_node,
+                     predict_impute_drop_node,
+                     predict_features_engineering
+                     ])
