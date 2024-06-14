@@ -11,6 +11,17 @@ from autogluon.tabular import TabularPredictor
 
 
 def train_model_and_evaluate(train_data: dd.DataFrame, test_data: dd.DataFrame, hyperparameters: JSONDataset) -> TabularPredictor:
+    """
+    Trains a model using AutoGluon on the given training data, evaluates it on the test data, logs the performance metrics and visualizations to Weights and Biases (WANDB).
+
+    Parameters:
+    train_data (dd.DataFrame): The training data in the form of a Dask DataFrame.
+    test_data (dd.DataFrame): The test data in the form of a Dask DataFrame.
+    hyperparameters (JSONDataset): The hyperparameters for training the model.
+
+    Returns:
+    TabularPredictor: The trained AutoGluon TabularPredictor.
+    """
     train_data: pd.DataFrame = train_data.compute()
     test_data: pd.DataFrame = test_data.compute()
 
@@ -68,7 +79,17 @@ def train_model_and_evaluate(train_data: dd.DataFrame, test_data: dd.DataFrame, 
     return predictor
 
 
-def predict_data(predictor: TabularPredictor, data: dd.DataFrame) -> dd.DataFrame:
+def predict_data(predictor: TabularPredictor, data: dd.DataFrame) -> pd.DataFrame:
+    """
+    Uses a trained AutoGluon predictor to make predictions on the given data.
+
+    Parameters:
+    predictor (TabularPredictor): The trained AutoGluon TabularPredictor.
+    data (dd.DataFrame): The data to make predictions on, in the form of a Dask DataFrame.
+
+    Returns:
+    pd.DataFrame: A Pandas DataFrame containing the original data along with the predictions.
+    """
     df_for_prediction: pd.DataFrame = data.compute()
     result: pd.DataFrame = predictor.predict(df_for_prediction)
     p_result_final: pd.DataFrame = pd.concat([df_for_prediction, result], axis=1)

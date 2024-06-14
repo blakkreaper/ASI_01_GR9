@@ -1,13 +1,20 @@
 import os
-
 import dask.dataframe as dd
-
 from .tran_dataframe import DataTransformation
 from sklearn.impute import SimpleImputer
 from dask_ml.model_selection import train_test_split
 
 
 def extract_to_parquet(raw_data_dir: str) -> dd.DataFrame:
+    """
+    Extracts text data files from a directory, reads them into Dask DataFrames, and concatenates them into a single DataFrame.
+
+    Parameters:
+    raw_data_dir (str): The directory containing raw text data files.
+
+    Returns:
+    dd.DataFrame: A concatenated Dask DataFrame containing data from all text files.
+    """
     # List all txt files in the directory
     txt_files = [os.path.join(raw_data_dir, f) for f in os.listdir(raw_data_dir) if f.endswith('.txt')]
 
@@ -33,12 +40,18 @@ def extract_to_parquet(raw_data_dir: str) -> dd.DataFrame:
     return combined_df
 
 
-def transform_parquet(
-    parquet_file: dd.DataFrame,
-    column_mapping,
-    columns_to_select
-) -> dd.DataFrame:
+def transform_parquet(parquet_file: dd.DataFrame, column_mapping, columns_to_select) -> dd.DataFrame:
+    """
+    Transforms a Dask DataFrame by renaming columns and selecting a subset of columns.
 
+    Parameters:
+    parquet_file (dd.DataFrame): The input Dask DataFrame to be transformed.
+    column_mapping (dict): A dictionary mapping old column names to new column names.
+    columns_to_select (list): A list of column names to select from the DataFrame.
+
+    Returns:
+    dd.DataFrame: The transformed Dask DataFrame with renamed and selected columns.
+    """
     # Rename columns
     joined_df = parquet_file.rename(columns=column_mapping)
 
@@ -50,15 +63,16 @@ def transform_parquet(
 
 def impute_and_drop(data: dd.DataFrame, columns_to_impute: list, columns_to_drop: list, strategy: str) -> dd.DataFrame:
     """
-    Impute missing values in specified columns using SimpleImputer in a Dask DataFrame.
+    Impute missing values in specified columns using SimpleImputer in a Dask DataFrame and drop specified columns.
 
     Parameters:
     data (dd.DataFrame): The input Dask DataFrame with missing values.
     columns_to_impute (list): List of column names to impute.
+    columns_to_drop (list): List of column names to drop.
     strategy (str): The strategy for imputation, e.g., 'mean', 'median', 'most_frequent'.
 
     Returns:
-    dd.DataFrame: Dask DataFrame with missing values imputed.
+    dd.DataFrame: Dask DataFrame with missing values imputed and specified columns dropped.
     """
     # Drop not needed columns
     data = data.drop(columns_to_drop, axis=1, errors='ignore')
@@ -82,13 +96,19 @@ def impute_and_drop(data: dd.DataFrame, columns_to_impute: list, columns_to_drop
     meta = data._meta
     imputed_data = data.map_partitions(impute_partition, imputer_cat, meta=meta)
 
-    # # Add the new column with the specified string value
-    # imputed_data['Class'] = new_column_value
-
     return imputed_data
 
 
 def features_engineering(data: dd.DataFrame) -> dd.DataFrame:
+    """
+    Performs feature engineering on a Dask DataFrame by aggregating numerical columns and calculating category counts.
+
+    Parameters:
+    data (dd.DataFrame): The input Dask DataFrame.
+
+    Returns:
+    dd.DataFrame: The Dask DataFrame with engineered features.
+    """
     assert 'Participant' in data.columns, "'Participant' column is not in the DataFrame"
 
     # Convert numeric columns to float, handling cases where columns might be missing or conversions could fail
@@ -142,18 +162,19 @@ def concat_dfs_and_add_class(anxious: dd.DataFrame, depressive: dd.DataFrame, co
     """
     Concatenate three Dask DataFrames, add a 'Class' column, globally shuffle, and then split into training/validation and test sets.
 
-    Args:
-        anxious (dd.DataFrame): DataFrame containing anxious data.
-        depressive (dd.DataFrame): DataFrame containing depressive data.
-        control (dd.DataFrame): DataFrame containing control group data.
-        test_size (float): The proportion of the dataset to include in the test split.
-        random_state (int): The seed used by the random number generator.
+    Parameters:
+    anxious (dd.DataFrame): DataFrame containing anxious data.
+    depressive (dd.DataFrame): DataFrame containing depressive data.
+    control (dd.DataFrame): DataFrame containing control group data.
+    test_size (float): The proportion of the dataset to include in the test split.
+    random_state (int): The seed used by the random number generator.
 
     Returns:
-        X_trainval (dd.DataFrame): Training/validation set features.
-        X_test (dd.DataFrame): Test set features.
-        Y_trainval (dd.DataFrame): Training/validation set target.
-        Y_test (dd.DataFrame): Test set target.
+    tuple: A tuple containing:
+        - X_trainval (dd.DataFrame): Training/validation set features.
+        - X_test (dd.DataFrame): Test set features.
+        - Y_trainval (dd.DataFrame): Training/validation set target.
+        - Y_test (dd.DataFrame): Test set target.
     """
     # Add 'Class' column to each DataFrame
     anxious = anxious.assign(Class='Anxious')
