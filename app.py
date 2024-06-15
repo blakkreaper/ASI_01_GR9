@@ -137,6 +137,13 @@ async def run_prediction():
             result_is_scam.to_csv(csv_buffer, index=False, sep='~')
             csv_buffer.seek(0)
 
+            # Save the result to a file
+            output_dir = Path("C:/Users/jwielonek/PycharmProjects/ASI_01_GR9/data/prediction_results")
+            output_dir.mkdir(parents=True, exist_ok=True)
+            output_file = output_dir / "result_is_scam.csv"
+            with open(output_file, "w", newline='', encoding='utf-8') as f:
+                f.write(csv_buffer.getvalue())
+
             # # Create a StreamingResponse with the CSV file
             # response = StreamingResponse(
             #     iter(csv_buffer),
