@@ -17,6 +17,8 @@ def upload_directory(path, use_for_training):
                     if response.status_code != 200:
                         st.error(f"Error uploading file {file}: {response.text}")
 
+# ------------------------------------------------------------------
+
 def main():
     st.title("Data Upload and Model Operation")
 
