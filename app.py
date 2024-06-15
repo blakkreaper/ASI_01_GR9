@@ -17,6 +17,7 @@ app = FastAPI()
 project_path = Path.cwd()
 bootstrap_project(project_path)
 
+# ------------------------------------------------------------------
 @app.post("/upload_training_data")
 async def upload_training_data(file: UploadFile = File(...)):
     try:
@@ -36,7 +37,7 @@ async def upload_training_data(file: UploadFile = File(...)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-
+# ------------------------------------------------------------------
 @app.post("/upload_prediction_data")
 async def upload_prediction_data(file: UploadFile = File(...)):
     try:
@@ -51,9 +52,7 @@ async def upload_prediction_data(file: UploadFile = File(...)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-
-
-
+# ------------------------------------------------------------------
 
 @app.get("/get_pipelines")
 async def get_pipelines():
@@ -64,6 +63,7 @@ async def get_pipelines():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+# ------------------------------------------------------------------
 @app.post("/run_pipeline")
 async def run_pipeline(pipeline_data: dict):
     try:
@@ -78,23 +78,7 @@ async def run_pipeline(pipeline_data: dict):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-
-
-# @app.post("/run_training")
-# async def run_training():
-#     try:
-#         print("wandbinit")
-#         wandb.init(project="depression_prediction", entity="s22807")
-#         print("wandbinitialised")
-#         run_id = wandb.run.id
-#         with KedroSession.create(project_path=project_path) as session:
-#             result = session.run(pipeline_name="training_train_model")
-#         wandb.finish()
-#         wandb_url = f"https://wandb.ai/s22807/depression_prediction/runs/{run_id}"
-#
-#         return {"status": "Pipeline executed", "result": result, "wandb_url": wandb_url}
-#     except Exception as e:
-#         raise HTTPException(status_code=500, detail=str(e))
+# ------------------------------------------------------------------
 
 @app.post("/run_training")
 async def run_training():
@@ -123,6 +107,7 @@ async def run_training():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+# ------------------------------------------------------------------
 
 @app.post("/run_preprocessing")
 async def run_preprocessing():
@@ -134,6 +119,7 @@ async def run_preprocessing():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+# ------------------------------------------------------------------
 # @app.post("/run_prediction")
 # async def run_prediction():
 #     try:
@@ -144,7 +130,7 @@ async def run_preprocessing():
 #     except Exception as e:
 #         raise HTTPException(status_code=500, detail=str(e))
 
-
+ # ------------------------------------------------------------------
     @app.post("/upload_and_run_pipeline")
     async def upload_and_run_pipeline(file: UploadFile = File(...)):
 
@@ -185,8 +171,7 @@ async def run_preprocessing():
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))
 
-
-
+# ------------------------------------------------------------------
 @app.post("/upload_hyperparameters_and_run_pipeline")
 async def upload_hyperparameters_and_run_pipeline(hyperparams_file: UploadFile = File(...)):
     """
@@ -242,6 +227,7 @@ async def upload_hyperparameters_and_run_pipeline(hyperparams_file: UploadFile =
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+# ------------------------------------------------------------------
 class Hyperparameters(BaseModel):
     XGB: dict = {}
     GBM: dict = {}
@@ -249,6 +235,7 @@ class Hyperparameters(BaseModel):
     KNN: dict = {}
     CAT: dict = {}
 
+# ------------------------------------------------------------------
 default_hyperparameters = {
         'XGB': {'booster': 'gbtree', 'verbosity': 1},
         'GBM': {'extra_trees': True},
@@ -257,6 +244,7 @@ default_hyperparameters = {
         'CAT': {'iterations': 10000, 'learning_rate': 0.01}
     }
 
+# ------------------------------------------------------------------
 @app.post("/upload_hyperparameters")
 async def upload_hyperparameters(hyperparams: Hyperparameters):
     try:
