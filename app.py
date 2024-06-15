@@ -42,7 +42,7 @@ async def upload_training_data(file: UploadFile = File(...)):
 async def upload_prediction_data(file: UploadFile = File(...)):
     try:
         # Directory where prediction files will be saved
-        file_path: str = "data/01_raw/prediction/patients_raw.csv"
+        file_path: str = "data/01_raw/prediction/Raw Data - Raw Data.txt"
 
         # Save the uploaded file
         with open(file_path, "wb") as buffer:
@@ -120,15 +120,33 @@ async def run_preprocessing():
         raise HTTPException(status_code=500, detail=str(e))
 
 # ------------------------------------------------------------------
-# @app.post("/run_prediction")
-# async def run_prediction():
-#     try:
-#         with KedroSession.create(project_path=project_path) as session:
-#             result = session.run(pipeline_name="prediction_pipeline")
-#
-#         return {"status": "Pipeline executed", "result": result}
-#     except Exception as e:
-#         raise HTTPException(status_code=500, detail=str(e))
+@app.post("/run_prediction")
+async def run_prediction():
+
+    try:
+        with KedroSession.create(project_path=project_path) as session:
+            result = session.run(pipeline_name='predict_data')
+            context = session.load_context()
+            catalog = context.catalog
+            print("Result")
+            result_is_scam: pd.DataFrame = catalog.load("p_result")
+            print("Result2")
+
+            # Convert the DataFrame to CSV
+            csv_buffer = io.StringIO()
+            result_is_scam.to_csv(csv_buffer, index=False, sep='~')
+            csv_buffer.seek(0)
+
+            # # Create a StreamingResponse with the CSV file
+            # response = StreamingResponse(
+            #     iter(csv_buffer),
+            #     media_type="text/csv"
+            # )
+            # response.headers["Content-Disposition"] = "attachment; filename=result_is_scam.csv"
+
+        return {"status": "Pipeline executed"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
  # ------------------------------------------------------------------
     @app.post("/upload_and_run_pipeline")

@@ -111,7 +111,7 @@ def main():
 
     with col3:
         if st.button("Run prediction_pipeline"):
-            response = requests.post(f"{API_URL}/upload_and_run_pipeline")
+            response = requests.post(f"{API_URL}/run_prediction")
             if response.status_code == 200:
                 st.success("Pipeline prediction_pipeline executed successfully!")
             else:
