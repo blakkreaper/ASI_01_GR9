@@ -1,0 +1,47 @@
+{
+    "os": "Windows-10-10.0.22631-SP0",
+    "python": "3.11.7",
+    "heartbeatAt": "2024-06-15T12:13:43.978477",
+    "startedAt": "2024-06-15T12:13:42.924958",
+    "docker": null,
+    "cuda": null,
+    "args": [
+        "app:app",
+        "--reload"
+    ],
+    "state": "running",
+    "program": "<python with no main file>",
+    "codePathLocal": null,
+    "git": {
+        "remote": "https://github.com/blakkreaper/ASI_01_GR9.git",
+        "commit": "5223e3691a03d644e6e80c564e6eb15889eb10c9"
+    },
+    "email": "s16943@pjwstk.edu.pl",
+    "root": "C:/Users/jwielonek/PycharmProjects/ASI_01_GR9",
+    "host": "WBP015CP4N29",
+    "username": "jwielonek",
+    "executable": "C:\\Users\\jwielonek\\PycharmProjects\\ASI_01_GR9\\.venv\\Scripts\\python.exe",
+    "cpu_count": 12,
+    "cpu_count_logical": 16,
+    "cpu_freq": {
+        "current": 1711.0,
+        "min": 0.0,
+        "max": 2200.0
+    },
+    "cpu_freq_per_core": [
+        {
+            "current": 1711.0,
+            "min": 0.0,
+            "max": 2200.0
+        }
+    ],
+    "disk": {
+        "/": {
+            "total": 285.89843368530273,
+            "used": 148.14424514770508
+        }
+    },
+    "memory": {
+        "total": 15.673698425292969
+    }
+}

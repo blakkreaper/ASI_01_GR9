@@ -1,0 +1,99 @@
+wandb_version: 1
+
+_wandb:
+  desc: null
+  value:
+    python_version: 3.11.7
+    cli_version: 0.16.6
+    is_jupyter_run: false
+    is_kaggle_kernel: false
+    start_time: 1718454169.0
+    t:
+      1:
+      - 15
+      - 55
+      - 105
+      2:
+      - 1
+      - 5
+      - 7
+      - 15
+      - 30
+      - 53
+      - 54
+      - 55
+      - 105
+      3:
+      - 2
+      - 23
+      - 24
+      4: 3.11.7
+      5: 0.16.6
+      8:
+      - 3
+      - 5
+      - 9
+      13: windows-amd64
+    framework: catboost
+    visualize:
+      Metrics Bar Chart:
+        panel_type: Vega2
+        panel_config:
+          panelDefId: wandb/bar/v0
+          fieldSettings:
+            label: Metric
+            value: Value
+          stringSettings:
+            title: Performance Metrics
+          transform:
+            name: tableWithLeafColNames
+          userQuery:
+            queryFields:
+            - name: runSets
+              args:
+              - name: runSets
+                value: ${runSets}
+              fields:
+              - name: id
+                fields: []
+              - name: name
+                fields: []
+              - name: _defaultColorIndex
+                fields: []
+              - name: summaryTable
+                args:
+                - name: tableKey
+                  value: Metrics Bar Chart_table
+                fields: []
+      ROC Curve:
+        panel_type: Vega2
+        panel_config:
+          panelDefId: wandb/area-under-curve/v0
+          fieldSettings:
+            x: fpr
+            y: tpr
+            class: class
+          stringSettings:
+            title: ROC
+            x-axis-title: False positive rate
+            y-axis-title: True positive rate
+          transform:
+            name: tableWithLeafColNames
+          userQuery:
+            queryFields:
+            - name: runSets
+              args:
+              - name: runSets
+                value: ${runSets}
+              fields:
+              - name: id
+                fields: []
+              - name: name
+                fields: []
+              - name: _defaultColorIndex
+                fields: []
+              - name: summaryTable
+                args:
+                - name: tableKey
+                  value: ROC Curve_table
+                fields: []
