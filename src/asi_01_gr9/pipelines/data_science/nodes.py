@@ -34,7 +34,7 @@ def train_model_and_evaluate(train_data: dd.DataFrame, test_data: dd.DataFrame, 
     # }
 
     # Inicjalizacja sesji WANDB
-    wandb.init(project="depression_prediction", entity="mlody1230")
+    wandb.init(project="depression_prediction", entity="s16943")
     label: str = 'Class'
 
     # Trenowanie modelu z AutoGluon
